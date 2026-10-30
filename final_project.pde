@@ -130,6 +130,7 @@ void draw() {
     // Wait for Start to be pressed
     if ((conA & 0b1) == 0b1) {
       plyManagement += 0b100000;
+      bombs += 2;
       refreshing = true;
     }
     
@@ -224,7 +225,8 @@ void draw() {
     }
     
     // Bomb
-    if ((conA & 0b100) == 0b100 && (bombInfo & 0b10) == 0) {deployBomb(true);}
+    if ((conA & 0b100) == 0b100 && (bombInfo & 0b10) == 0)
+      if (bombs > 0) {deployBomb(true); bombs--;}
     
     // Ensure P1 is within the bounds of the screen
     if (p1X < 10) p1X = 10;
@@ -241,6 +243,7 @@ void draw() {
     // Wait for Start to be pressed
     if ((conB & 0b1) == 0b1) {
       plyManagement += 0b10000;
+      bombs += 8; // 2 * 0b100 = 8 (for binary reasons)
       refreshing = true;
     }
     

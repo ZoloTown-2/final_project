@@ -95,19 +95,21 @@ void keyPressed() {
         break;
       
       // P2 Shoot
-      case 'o':
+      case 'p':
         if ((conB & 0b1000) == 0b1000) return;
         conB += 0b1000;
         break;
       
       // P2 Bomb
-      case 'l':
+      case '-':
+      case '_':
         if ((conB & 0b100) == 0b100) return;
         conB += 0b100;
         break;
       
       // P2 Focus
-      case 'p':
+      case '=':
+      case '+':
         if ((conB & 0b10) == 0b10) return;
         conB += 0b10;
         break;
@@ -203,19 +205,21 @@ void keyReleased() {
         break;
       
       // P2 Shoot
-      case 'o':
+      case 'p':
         if ((conB & 0b1000) == 0) return;
         conB -= 0b1000;
         break;
       
       // P2 Bomb
-      case 'l':
+      case '-':
+      case '_':
         if ((conB & 0b100) == 0) return;
         conB -= 0b100;
         break;
       
       // P2 Focus
-      case 'p':
+      case '=':
+      case '+':
         if ((conB & 0b10) == 0) return;
         conB -= 0b10;
         break;

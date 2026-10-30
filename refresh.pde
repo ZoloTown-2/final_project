@@ -19,6 +19,8 @@ void refresh() {
     - P1 shots
     - P1 options
     - P1
+    - P1 bomb count
+    - P2 bomb count
     
     The further an item is down the list, the higher priority they get when displaying.
   */
@@ -134,5 +136,27 @@ void refresh() {
     // Draw player 1
     triangle(p1X, p1Y - 12, p1X - 8, p1Y + 12, p1X + 8, p1Y + 12);
   
+  }
+  
+  // Is P1 playing? (for HUD)
+  if ((plyManagement & 0b100000) == 0b100000) {
+    strokeWeight(0);
+    fill(223, 223, 0);
+    for (byte i = 0; i < (bombs & 0b11); i++) {
+      
+      circle(i * 20 + 16, (p1X < 50 && p1Y > 350) || (p2X < 50 && p2Y > 350) ? 25 : 375, 18);
+      
+    }
+  }
+  
+  // Is P2 playing? (for HUD)
+  if ((plyManagement & 0b10000) == 0b10000) {
+    strokeWeight(0);
+    fill(223, 223, 0);
+    for (byte i = 0; i < ((bombs & 0b1100) >> 2); i++) {
+      
+      circle(400 + (i * -20 - 16), (p1X > 350 && p1Y > 350) || (p2X > 350 && p2Y > 350) ? 25 : 375, 18);
+      
+    }
   }
 }
