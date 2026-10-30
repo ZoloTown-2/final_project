@@ -71,19 +71,19 @@ void keyPressed() {
         break;
       
       // P1 Shoot
-      case 'c':
+      case '4':
         if ((conA & 0b1000) == 0b1000) return;
         conA += 0b1000;
         break;
       
       // P1 Bomb
-      case 'v':
+      case '5':
         if ((conA & 0b100) == 0b100) return;
         conA += 0b100;
         break;
       
       // P1 Focus
-      case 'b':
+      case '6':
         if ((conA & 0b10) == 0b10) return;
         conA += 0b10;
         break;
@@ -101,14 +101,13 @@ void keyPressed() {
         break;
       
       // P2 Bomb
-      case 'p':
+      case 'l':
         if ((conB & 0b100) == 0b100) return;
         conB += 0b100;
         break;
       
       // P2 Focus
-      case '[':
-      case '{':
+      case 'p':
         if ((conB & 0b10) == 0b10) return;
         conB += 0b10;
         break;
@@ -180,19 +179,19 @@ void keyReleased() {
         break;
       
       // P1 Shoot
-      case 'c':
+      case '4':
         if ((conA & 0b1000) == 0) return;
         conA -= 0b1000;
         break;
       
       // P1 Bomb
-      case 'v':
+      case '5':
         if ((conA & 0b100) == 0) return;
         conA -= 0b100;
         break;
       
       // P1 Focus
-      case 'b':
+      case '6':
         if ((conA & 0b10) == 0) return;
         conA -= 0b10;
         break;
@@ -210,14 +209,13 @@ void keyReleased() {
         break;
       
       // P2 Bomb
-      case 'p':
+      case 'l':
         if ((conB & 0b100) == 0) return;
         conB -= 0b100;
         break;
       
       // P2 Focus
-      case '[':
-      case '{':
+      case 'p':
         if ((conB & 0b10) == 0) return;
         conB -= 0b10;
         break;
