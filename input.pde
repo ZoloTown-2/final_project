@@ -18,7 +18,7 @@
   Focus: = or +
   
   
-  I apologize if the controls are cramped, they are positioned for the very rare case
+  I apologize if the controls are cramped; they are positioned for the very rare case
   two people play on the same keyboard.
 
 */

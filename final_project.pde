@@ -13,6 +13,10 @@
 
 import java.util.concurrent.TimeUnit;
 
+// It'd be really neat if final/const variables that contain literals were just compiled as literals instead of stored in memory
+// They don't really need to be in memory if you think about it, everything should still work perfectly that way
+// I guess C++ does that with #define
+
 // Shot types
 final byte LSHOT = 0; // Linear shot (P1 main)
 final byte LOMSHOT = 1; // Linear middle option shot (P1 option)
@@ -27,8 +31,11 @@ final byte WOMSHOT = 9; // Wide middle shot (P2 option)
 final byte WOLSHOT = 10; // Wide left option shot (P2 option)
 final byte WORSHOT = 11; // Wide right option shot (P2 option)
 
-// It'd be really neat if final/const variables that contain literals were just compiled as literals instead of stored in memory
-// They don't really need to be in memory if you think about it, everything should still work perfectly that way
+// Bullet types
+final byte B_ORANGEBALL = 0;
+final byte B_PINKBALL = 1;
+final byte B_BLUEBALL = 2;
+
 
 // Player variables
 short p1X = 100, p1Y = 350, p2X = 300, p2Y = 350; // P1/2 positions
@@ -111,7 +118,8 @@ short bulletCount = 0;
 // Timer variables
 long timer = 0;
 boolean frameType = false; // For 30 FPS operations
-boolean subFrameType = false;
+boolean subFrameType = false; // For 15 FPS operations
+boolean subSubFrameType = false; // For 7.5 FPS operations
 
 
 // Misc variables
@@ -137,27 +145,60 @@ byte[] p2ShotType = new byte[0];
 // Bullet arrays
 short[] bulletRemoval = new short[0];
 
-short[] bulletX = new short[0];
-short[] bulletY = new short[0];
+float[] bulletX = new float[0];
+float[] bulletY = new float[0];
 short[] bulletDir = new short[0];
 byte[] bulletSpd = new byte[0];
+byte[] bulletType = new byte[0];
+byte[] bulletSize = new byte[0];
 
 
+// Enemy arrays
+EnemyComp[] enemies = new EnemyComp[0];
+
+
+// General methods
+double pointTo(short x1, short y1, short x2, short y2) {return Math.toDegrees(Math.atan2(x1 - x2, y1 - y2)) + 180;}
+
+
+// Initialization
 void setup() {
   size(400, 400);
+  frameRate(Integer.MAX_VALUE); // I have implemented my own frame throttling system; I don't know if Processing accomodates for processing time by default
   //noSmooth();
   
   refresh();
 }
 
 
+// Per frame
 void draw() {
   timer = System.nanoTime();
   
   frameType = !frameType;
   if (frameType) {subFrameType = !subFrameType;}
+  if (frameType && subFrameType) {subSubFrameType = !subSubFrameType;}
   
   refreshing = false;
+  
+  // Enemy actions
+  for (short i = 0; i < enemies.length; i++) {
+    if ((enemies[i].management & 0b100) >> 2 == 1) {removeEnemy(i--); continue;}
+    
+    if (
+      ((enemies[i].management & 0b10000) >> 4 == 1) && // Airborne?
+      (plyManagement & 0b100000) == 0b100000 && // Playing?
+      (stocks & 0b1000000) == 0b1000000 && // Existing?
+      (p1IFrames < 1) && // Vulnerable?
+      ( // Colliding?
+        (p1X - 3 < enemies[i].x + enemies[i].boxWidth / 2 && p1X + 2 > enemies[i].x - enemies[i].boxWidth / 2) &&
+        (p1Y - 3 < enemies[i].y + enemies[i].boxHeight / 2 && p1Y + 2 > enemies[i].y - enemies[i].boxHeight / 2)
+      ) 
+    ) {println("You're dead meat");}
+    
+    enemies[i].resetTint();
+    enemies[i].act();
+  }
   
   // P1 Controls
   if ((plyManagement & 0b100000) == 0) {
@@ -166,7 +207,6 @@ void draw() {
     if ((conA & 0b1) == 0b1) {
       plyManagement += 0b100000;
       stocks += 3;
-      bombs += 2;
       refreshing = true;
       
       spawnPlayer(true);
@@ -282,7 +322,6 @@ void draw() {
     if ((conB & 0b1) == 0b1) {
       plyManagement += 0b10000;
       stocks += 24; // 3 * 0b1000 = 24 (for binary reasons)
-      bombs += 8; // 2 * 0b100 = 8 (for binary reasons)
       refreshing = true;
       
       spawnPlayer(false);
@@ -391,7 +430,7 @@ void draw() {
   }
   
   
-  // Advance the player shots
+  // Advance the player shots and check for enemy collision
   for (byte i = 0; i < p1ShotY.length; i++) {
     switch (p1ShotType[i]) {
       
@@ -422,7 +461,35 @@ void draw() {
       
     }
     
-    if (p1ShotY[i] < -32) {removePlayerShot(i, true); i--;} // We must go back one since removePlayerShot() removes an item
+    if (p1ShotY[i] < -32) {removePlayerShot(i--, true);} // We must go back one since removePlayerShot() removes an item
+    else {
+      for (short j = 0; j < enemies.length; j++) {
+        if (
+          (p1ShotX[i] - 1 < enemies[j].x + enemies[j].boxWidth / 2 && p1ShotX[i] + 1 > enemies[j].x - enemies[j].boxWidth / 2) &&
+          (p1ShotY[i] - 1 < enemies[j].y + enemies[j].boxHeight / 2 && p1ShotY[i] + 1 > enemies[j].y - enemies[j].boxHeight / 2)
+        ) {
+          switch (p1ShotType[i]) {
+            case LSHOT:
+              enemies[j].damage((short) 2);
+              break;
+            
+            case LOMSHOT:
+            case LOLNSHOT:
+            case LOLFSHOT:
+            case LORNSHOT:
+            case LORFSHOT:
+              enemies[j].damage((short) 1);
+              break;
+            
+            default:
+              println("Bad shot type when hitting enemy (P1).");
+          }
+          
+          removePlayerShot(i--, true);
+        }
+      }
+    }
+    
     refreshing = true;
   }
   
@@ -457,7 +524,34 @@ void draw() {
     
     }
     
-    if (p2ShotY[i] < -32) {removePlayerShot(i, false); i--;} // Same goes for here; we must go back
+    if (p2ShotY[i] < -32) {removePlayerShot(i--, false);} // Same goes for here; we must go back
+    else {
+      for (short j = 0; j < enemies.length; j++) {
+        if (
+          (p2ShotX[i] - 1 < enemies[j].x + enemies[j].boxWidth / 2 && p2ShotX[i] + 1 > enemies[j].x - enemies[j].boxWidth / 2) &&
+          (p2ShotY[i] - 1 < enemies[j].y + enemies[j].boxHeight / 2 && p2ShotY[i] + 1 > enemies[j].y - enemies[j].boxHeight / 2)
+        ) {
+          switch (p2ShotType[i]) {
+            case WMSHOT:
+            case WLSHOT:
+            case WRSHOT:
+              enemies[j].damage((short) 2);
+              break;
+            
+            case WOMSHOT:
+            case WOLSHOT:
+            case WORSHOT:
+              enemies[j].damage((short) 1);
+              break;
+            
+            default:
+              println("Bad shot type when hitting enemy (P2).");
+          }
+          
+          removePlayerShot(i--, false);
+        }
+      }
+    }
     refreshing = true;
   }
   
@@ -465,8 +559,8 @@ void draw() {
   // Advance enemy bullets (the fun part)
   for (short i = 0; i < bulletX.length; i++) { // Yes, I'm going as far as to say "short" instead of "byte"
     
-    bulletX[i] += Math.round(Math.sin((double) bulletDir[i] * Math.PI / 180) * bulletSpd[i]); // Convert degrees to radians on the go
-    bulletY[i] += Math.round(Math.cos((double) bulletDir[i] * Math.PI / 180) * bulletSpd[i]);
+    bulletX[i] += Math.sin(Math.toRadians(bulletDir[i])) * bulletSpd[i]; // Convert degrees to radians on the go
+    bulletY[i] += Math.cos(Math.toRadians(bulletDir[i])) * bulletSpd[i];
     
     boolean differing = true;
     for (short j = 0; j < bulletRemoval.length; j++) {if (bulletRemoval[j] == i) {differing = false; break;}}
@@ -510,7 +604,7 @@ void draw() {
       (plyManagement & 0b100000) == 0b100000 && // Playing?
       (stocks & 0b1000000) == 0b1000000 && // Existing?
       (p1IFrames < 1) && // Vulnerable?
-      (dist(bulletX[i], bulletY[i], p1X, p1Y) <= 5) // Colliding?
+      (dist(bulletX[i], bulletY[i], p1X, p1Y) <= bulletSize[i]) // Colliding?
     ) {
       stocks = (byte) (stocks & 0b10111111);
       respawnTime += 15;
@@ -521,7 +615,7 @@ void draw() {
       (plyManagement & 0b10000) == 0b10000 && // Playing?
       (stocks & 0b10000000) == 0b10000000 && // Existing?
       (p2IFrames < 1) && // Vulnerable?
-      (dist(bulletX[i], bulletY[i], p2X, p2Y) <= 5) // Colliding?
+      (dist(bulletX[i], bulletY[i], p2X, p2Y) <= bulletSize[i]) // Colliding?
     ) {
       stocks = (byte) (stocks & 0b1111111);
       respawnTime += 240; // 15 & 0b10000 = 240 (for binary reasons)
@@ -558,6 +652,13 @@ void draw() {
       
     }
     
+    for (short i = 0; i < enemies.length; i++) {
+      if (
+        (p1BombX - p1BombSize / 2 < enemies[i].x + enemies[i].boxWidth / 2 && p1BombX + p1BombSize / 2 > enemies[i].x - enemies[i].boxWidth / 2) &&
+        (p1BombY - p1BombSize / 2 < enemies[i].y + enemies[i].boxHeight / 2 && p1BombY + p1BombSize / 2 > enemies[i].y - enemies[i].boxHeight / 2)
+      ) enemies[i].damage((short) 1);
+    }
+    
     refreshing = true;
     
   } else if (frameType && (bombInfo & 0b10) == 0 && ((bombInfo & 0b11111100) >> 2) > 0)
@@ -568,7 +669,14 @@ void draw() {
   
     p2BombSize[i] += 4;
     
-    if (p2BombSize[i] >= 60) {removeP2Bomb(i); i--;} // And here, also go back
+    if (p2BombSize[i] >= 60) {removeP2Bomb(i--); refreshing = true; continue;} // And here, also go back
+    
+    for (short j = 0; j < enemies.length; j++) {
+      if (
+        (p2BombX[i] - p2BombSize[i] / 2 < enemies[j].x + enemies[j].boxWidth / 2 && p2BombX[i] + p2BombSize[i] / 2 > enemies[j].x - enemies[j].boxWidth / 2) &&
+        (p2BombY[i] - p2BombSize[i] / 2 < enemies[j].y + enemies[j].boxHeight / 2 && p2BombY[i] + p2BombSize[i] / 2 > enemies[j].y - enemies[j].boxHeight / 2)
+      ) enemies[j].damage((short) 1);
+    }
     
     refreshing = true;
     
@@ -608,9 +716,16 @@ void draw() {
   if (p2IFrames > 0) p2IFrames--;
   
   
+  
   // Other tasks
-  if (frameType)
-    addBullet((short) random(1, 400), (short) 20, (short) 0, (byte) 3); // I'm about to lose it I'm about to freak out man
+  /*
+    if (frameType)
+      addBullet((short) random(1, 400), (short) 20, 0, (byte) 3); // I'm about to lose it I'm about to freak out man
+  */
+  
+  // if (frameCount == 1) {addEnemy(new TestComp((short) 200, (short) 100)); refreshing = true;}
+  
+  if (frameCount == 1) {addEnemy(new DollarStoreHibachi((short) 200, (short) 100));}
     
   
   // Redraw the screen (refer to the "refresh" tab)
@@ -619,7 +734,7 @@ void draw() {
   lastProcessTime = System.nanoTime() - timer;
   
   // This should run around 60 FPS
-  try {TimeUnit.NANOSECONDS.sleep(16666667 - (System.nanoTime() - timer));} catch (InterruptedException e) {} catch (IllegalArgumentException e) {
+  try {TimeUnit.NANOSECONDS.sleep(16666667 - (lastProcessTime));} catch (InterruptedException e) {} catch (IllegalArgumentException e) {
     try {TimeUnit.NANOSECONDS.sleep(16666667);} catch (InterruptedException ex) {}
   }
 }

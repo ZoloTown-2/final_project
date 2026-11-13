@@ -11,6 +11,7 @@ void refresh() {
   /*
     Order of operation:
     
+    - Enemies (oldest to newest)
     - P1 bomb
     - P2 bomb
     - P2 shots
@@ -26,6 +27,12 @@ void refresh() {
     
     The further an item is down the list, the higher priority they get when displaying.
   */
+  
+  // Draw enemies
+  for (short i = 0; i < enemies.length; i++) {
+    enemies[i].prePaint();
+    enemies[i].paint();
+  }
   
   
   // Draw P1 bomb
@@ -168,10 +175,30 @@ void refresh() {
   }
   
   // Draw enemy bullets
-  fill(255, 127, 0);
+  strokeWeight(1);
   for (short i = 0; i < bulletX.length; i++) {
     
-    circle(bulletX[i], bulletY[i], 10);
+    switch (bulletType[i]) {
+      
+      case B_ORANGEBALL:
+        fill(255, 127, 0);
+        circle(bulletX[i], bulletY[i], 10);
+        break;
+      
+      case B_PINKBALL:
+        fill(255, 127, 223);
+        circle(bulletX[i], bulletY[i], 10);
+        break;
+      
+      case B_BLUEBALL:
+        fill(127, 127, 255);
+        circle(bulletX[i], bulletY[i], 10);
+        break;
+      
+      default:
+        println("Bad bullet type. (index #" + i + ")");
+      
+    }
     
   }
   
@@ -182,7 +209,7 @@ void refresh() {
     fill(223, 191, 0);
     for (byte i = 0; i < (bombs & 0b11); i++) {
       
-      circle(i * 20 + 16, (p1X < 50 && p1Y > 350) || (p2X < 50 && p2Y > 350) ? 25 : 385, 15);
+      circle(i * 20 + 12, (p1X < (25 * (bombs & 0b11)) && p1Y > 350) || (p2X < (25 * (bombs & 0b11)) && p2Y > 350) ? 50 : 385, 15);
       
     }
     
@@ -190,10 +217,10 @@ void refresh() {
     for (byte i = 0; i < (stocks & 0b111); i++) {
       
       beginShape();
-      vertex(i * 10 + 8, 18);
-      vertex(i * 10 + 4, 30);
-      vertex(i * 10 + 8, 26);
-      vertex(i * 10 + 12, 30);
+      vertex(i * 10 + 8, 24);
+      vertex(i * 10 + 4, 36);
+      vertex(i * 10 + 8, 32);
+      vertex(i * 10 + 12, 36);
       endShape();
       
     }
@@ -205,7 +232,7 @@ void refresh() {
     fill(223, 191, 0);
     for (byte i = 0; i < ((bombs & 0b1100) >> 2); i++) {
       
-      circle(400 + (i * -20 - 16), (p1X > 350 && p1Y > 350) || (p2X > 350 && p2Y > 350) ? 25 : 375, 15);
+      circle(400 + (i * -20 - 12), (p1X > 400 - (25 * ((bombs & 0b1100) >> 2)) && p1Y > 350) || (p2X > 400 - (25 * ((bombs & 0b1100) >> 2)) && p2Y > 350) ? 50 : 385, 15);
       
     }
     
@@ -213,10 +240,10 @@ void refresh() {
     for (byte i = 0; i < ((stocks & 0b111000) >> 3); i++) {
       
       beginShape();
-      vertex(400 + (i * -10) - 8, 20);
-      vertex(400 + (i * -10) - 3, 30);
-      vertex(400 + (i * -10) - 8, 28);
-      vertex(400 + (i * -10) - 13, 30);
+      vertex(400 + (i * -10) - 8, 26);
+      vertex(400 + (i * -10) - 3, 36);
+      vertex(400 + (i * -10) - 8, 34);
+      vertex(400 + (i * -10) - 13, 36);
       endShape();
       
     }
