@@ -35,6 +35,7 @@ final byte WORSHOT = 11; // Wide right option shot (P2 option)
 final byte B_ORANGEBALL = 0;
 final byte B_PINKBALL = 1;
 final byte B_BLUEBALL = 2;
+final byte B_YELLOWLARGE = 3;
 
 
 // Player variables
@@ -117,6 +118,7 @@ short bulletCount = 0;
 
 // Timer variables
 long timer = 0;
+int simulatedFrames = 0; // frameCount will continue whether or not the game is paused, which makes sense
 boolean frameType = false; // For 30 FPS operations
 boolean subFrameType = false; // For 15 FPS operations
 boolean subSubFrameType = false; // For 7.5 FPS operations
@@ -125,6 +127,10 @@ boolean subSubFrameType = false; // For 7.5 FPS operations
 // Misc variables
 long lastProcessTime = 0;
 boolean refreshing = false;
+
+boolean pausePressed = false;
+boolean paused = false;
+boolean canPause = true;
 
 
 // Player arrays
@@ -141,13 +147,16 @@ short[] p2BombSize = new short[0];
 byte[] p1ShotType = new byte[0];
 byte[] p2ShotType = new byte[0];
 
+byte[] p1ShotRemoval = new byte[0];
+byte[] p2ShotRemoval = new byte[0];
+
 
 // Bullet arrays
 short[] bulletRemoval = new short[0];
 
 float[] bulletX = new float[0];
 float[] bulletY = new float[0];
-short[] bulletDir = new short[0];
+float[] bulletDir = new float[0];
 byte[] bulletSpd = new byte[0];
 byte[] bulletType = new byte[0];
 byte[] bulletSize = new byte[0];
@@ -173,6 +182,25 @@ void setup() {
 
 // Per frame
 void draw() {
+  if (paused) {
+    refreshing = false;
+    
+    if (pausePressed && canPause) {
+      paused = false;
+      canPause = false;
+    }
+    else if (!pausePressed && !canPause)
+      canPause = true;
+    
+    try {TimeUnit.NANOSECONDS.sleep(16666667 - (lastProcessTime));} catch (InterruptedException e) {} catch (IllegalArgumentException e) {
+      try {TimeUnit.NANOSECONDS.sleep(16666667);} catch (InterruptedException ex) {}
+    }
+    
+    return;
+  }
+  
+  simulatedFrames++;
+  
   timer = System.nanoTime();
   
   frameType = !frameType;
@@ -185,17 +213,40 @@ void draw() {
   for (short i = 0; i < enemies.length; i++) {
     if ((enemies[i].management & 0b100) >> 2 == 1) {removeEnemy(i--); continue;}
     
-    if (
-      ((enemies[i].management & 0b10000) >> 4 == 1) && // Airborne?
-      (plyManagement & 0b100000) == 0b100000 && // Playing?
-      (stocks & 0b1000000) == 0b1000000 && // Existing?
-      (p1IFrames < 1) && // Vulnerable?
-      ( // Colliding?
-        (p1X - 3 < enemies[i].x + enemies[i].boxWidth / 2 && p1X + 2 > enemies[i].x - enemies[i].boxWidth / 2) &&
-        (p1Y - 3 < enemies[i].y + enemies[i].boxHeight / 2 && p1Y + 2 > enemies[i].y - enemies[i].boxHeight / 2)
-      ) 
-    ) {println("You're dead meat");}
+    // Check if this enemy is airborne
+    if ((enemies[i].management & 0b10000) >> 4 == 1) {
+      
+      // Check if this airborne enemy is touching P1
+      if (
+        (plyManagement & 0b100000) == 0b100000 && // Playing?
+        (stocks & 0b1000000) == 0b1000000 && // Existing?
+        (p1IFrames < 1) && // Vulnerable?
+        ( // Colliding?
+          (p1X - 3 < enemies[i].getX() + enemies[i].boxWidth / 2 && p1X + 2 > enemies[i].getX() - enemies[i].boxWidth / 2) &&
+          (p1Y - 3 < enemies[i].getY() + enemies[i].boxHeight / 2 && p1Y + 2 > enemies[i].getY() - enemies[i].boxHeight / 2)
+        ) 
+      ) {
+        stocks = (byte) (stocks & 0b10111111); 
+        respawnTime += 15;
+      }
+      
+      // Check if this airborne enemy is touching P2
+      if (
+        (plyManagement & 0b10000) == 0b10000 && // Playing?
+        (stocks & 0b10000000) == 0b10000000 && // Existing?
+        (p2IFrames < 1) && // Vulnerable?
+        ( // Colliding?
+          (p2X - 3 < enemies[i].getX() + enemies[i].boxWidth / 2 && p2X + 2 > enemies[i].getX() - enemies[i].boxWidth / 2) &&
+          (p2Y - 3 < enemies[i].getY() + enemies[i].boxHeight / 2 && p2Y + 2 > enemies[i].getY() - enemies[i].boxHeight / 2)
+        ) 
+      ) {
+        stocks = (byte) (stocks & 0b1111111);
+        respawnTime += 240; // 15 & 0b10000 = 240 (for binary reasons)
+      }
+      
+    }
     
+    // Do enemy actions
     enemies[i].resetTint();
     enemies[i].act();
   }
@@ -461,12 +512,15 @@ void draw() {
       
     }
     
-    if (p1ShotY[i] < -32) {removePlayerShot(i--, true);} // We must go back one since removePlayerShot() removes an item
-    else {
+    boolean differing = true;
+    for (short j = 0; j < p1ShotRemoval.length; j++) {if (p1ShotRemoval[j] == i) {differing = false; break;}}
+    
+    if (differing && p1ShotY[i] < -32) {differing = false; markPlayerShotForRemoval(i, true);}
+    else if (differing) {
       for (short j = 0; j < enemies.length; j++) {
         if (
-          (p1ShotX[i] - 1 < enemies[j].x + enemies[j].boxWidth / 2 && p1ShotX[i] + 1 > enemies[j].x - enemies[j].boxWidth / 2) &&
-          (p1ShotY[i] - 1 < enemies[j].y + enemies[j].boxHeight / 2 && p1ShotY[i] + 1 > enemies[j].y - enemies[j].boxHeight / 2)
+          (p1ShotX[i] - 1 < enemies[j].getX() + enemies[j].boxWidth / 2 && p1ShotX[i] + 1 > enemies[j].getX() - enemies[j].boxWidth / 2) &&
+          (p1ShotY[i] - 1 < enemies[j].getY() + enemies[j].boxHeight / 2 && p1ShotY[i] + 1 > enemies[j].getY() - enemies[j].boxHeight / 2)
         ) {
           switch (p1ShotType[i]) {
             case LSHOT:
@@ -485,13 +539,24 @@ void draw() {
               println("Bad shot type when hitting enemy (P1).");
           }
           
-          removePlayerShot(i--, true);
+          if ((enemies[j].management & 0b100000) == 0) {
+            differing = false;
+            markPlayerShotForRemoval(i, true);
+          }
         }
       }
     }
     
     refreshing = true;
   }
+  
+  // Remove P1 shots that are marked to do so
+  for (short i = 0; i < p1ShotRemoval.length; i++) {
+    removePlayerShot(p1ShotRemoval[i], true);
+    for (short j = 0; j < p1ShotRemoval.length; j++) {if (p1ShotRemoval[j] > p1ShotRemoval[i]) p1ShotRemoval[j]--;}
+  }
+  
+  p1ShotRemoval = new byte[0];
   
   for (byte i = 0; i < p2ShotY.length; i++) {
     switch (p2ShotType[i]) {
@@ -521,15 +586,17 @@ void draw() {
         p2ShotX[i] += frameType ? 2 : 1;
         break;
       
-    
     }
     
-    if (p2ShotY[i] < -32) {removePlayerShot(i--, false);} // Same goes for here; we must go back
-    else {
+    boolean differing = true;
+    for (short j = 0; j < p2ShotRemoval.length; j++) {if (p2ShotRemoval[j] == i) {differing = false; break;}}
+    
+    if (differing && p2ShotY[i] < -32) {differing = false; markPlayerShotForRemoval(i, false);}
+    else if (differing) {
       for (short j = 0; j < enemies.length; j++) {
         if (
-          (p2ShotX[i] - 1 < enemies[j].x + enemies[j].boxWidth / 2 && p2ShotX[i] + 1 > enemies[j].x - enemies[j].boxWidth / 2) &&
-          (p2ShotY[i] - 1 < enemies[j].y + enemies[j].boxHeight / 2 && p2ShotY[i] + 1 > enemies[j].y - enemies[j].boxHeight / 2)
+          (p2ShotX[i] - 1 < enemies[j].getX() + enemies[j].boxWidth / 2 && p2ShotX[i] + 1 > enemies[j].getX() - enemies[j].boxWidth / 2) &&
+          (p2ShotY[i] - 1 < enemies[j].getY() + enemies[j].boxHeight / 2 && p2ShotY[i] + 1 > enemies[j].getY() - enemies[j].boxHeight / 2)
         ) {
           switch (p2ShotType[i]) {
             case WMSHOT:
@@ -548,12 +615,24 @@ void draw() {
               println("Bad shot type when hitting enemy (P2).");
           }
           
-          removePlayerShot(i--, false);
+          if ((enemies[j].management & 0b100000) == 0) {
+            differing = false;
+            markPlayerShotForRemoval(i, false);
+          }
         }
       }
     }
+    
     refreshing = true;
   }
+  
+  // Remove P2 shots that are marked to do so
+  for (short i = 0; i < p2ShotRemoval.length; i++) {
+    removePlayerShot(p2ShotRemoval[i], false);
+    for (short j = 0; j < p2ShotRemoval.length; j++) {if (p2ShotRemoval[j] > p2ShotRemoval[i]) p2ShotRemoval[j]--;}
+  }
+  
+  p2ShotRemoval = new byte[0];
   
   
   // Advance enemy bullets (the fun part)
@@ -562,7 +641,7 @@ void draw() {
     bulletX[i] += Math.sin(Math.toRadians(bulletDir[i])) * bulletSpd[i]; // Convert degrees to radians on the go
     bulletY[i] += Math.cos(Math.toRadians(bulletDir[i])) * bulletSpd[i];
     
-    boolean differing = true;
+    boolean differing = true; // Are we changing the properties of this bullet?
     for (short j = 0; j < bulletRemoval.length; j++) {if (bulletRemoval[j] == i) {differing = false; break;}}
     
     // Check if we are outside bounds or touching P1 bomb
@@ -575,7 +654,7 @@ void draw() {
           (bulletY[i] > p1BombY - p1BombSize / 2 && bulletY[i] < p1BombY + p1BombSize / 2)
         )
       )
-    ) {markBulletForRemoval(i);} // And here, go back
+    ) {markBulletForRemoval(i);}
     
     // Check if we are touching P2 bombs
     if ((bombInfo & 0b1) == 0b1) {
@@ -654,8 +733,8 @@ void draw() {
     
     for (short i = 0; i < enemies.length; i++) {
       if (
-        (p1BombX - p1BombSize / 2 < enemies[i].x + enemies[i].boxWidth / 2 && p1BombX + p1BombSize / 2 > enemies[i].x - enemies[i].boxWidth / 2) &&
-        (p1BombY - p1BombSize / 2 < enemies[i].y + enemies[i].boxHeight / 2 && p1BombY + p1BombSize / 2 > enemies[i].y - enemies[i].boxHeight / 2)
+        (p1BombX - p1BombSize / 2 < enemies[i].getX() + enemies[i].boxWidth / 2 && p1BombX + p1BombSize / 2 > enemies[i].getX() - enemies[i].boxWidth / 2) &&
+        (p1BombY - p1BombSize / 2 < enemies[i].getY() + enemies[i].boxHeight / 2 && p1BombY + p1BombSize / 2 > enemies[i].getY() - enemies[i].boxHeight / 2)
       ) enemies[i].damage((short) 1);
     }
     
@@ -669,12 +748,12 @@ void draw() {
   
     p2BombSize[i] += 4;
     
-    if (p2BombSize[i] >= 60) {removeP2Bomb(i--); refreshing = true; continue;} // And here, also go back
+    if (p2BombSize[i] >= 60) {removeP2Bomb(i--); refreshing = true; continue;}
     
     for (short j = 0; j < enemies.length; j++) {
       if (
-        (p2BombX[i] - p2BombSize[i] / 2 < enemies[j].x + enemies[j].boxWidth / 2 && p2BombX[i] + p2BombSize[i] / 2 > enemies[j].x - enemies[j].boxWidth / 2) &&
-        (p2BombY[i] - p2BombSize[i] / 2 < enemies[j].y + enemies[j].boxHeight / 2 && p2BombY[i] + p2BombSize[i] / 2 > enemies[j].y - enemies[j].boxHeight / 2)
+        (p2BombX[i] - p2BombSize[i] / 2 < enemies[j].getX() + enemies[j].boxWidth / 2 && p2BombX[i] + p2BombSize[i] / 2 > enemies[j].getX() - enemies[j].boxWidth / 2) &&
+        (p2BombY[i] - p2BombSize[i] / 2 < enemies[j].getY() + enemies[j].boxHeight / 2 && p2BombY[i] + p2BombSize[i] / 2 > enemies[j].getY() - enemies[j].boxHeight / 2)
       ) enemies[j].damage((short) 1);
     }
     
@@ -685,8 +764,8 @@ void draw() {
   // Spawn P2 bombs (if necessary)
   if (frameType && subFrameType && ((bombs & 0b11110000) >> 4) > 0) {
     
-    addP2Bomb((short) (p2BombOriginX - 15), (short) (p2BombOriginY - 40 * (7 - ((bombs & 0b11110000) >> 4))), (short) (10)); // How did we, collectively, let "(short) (10)" happen?
-    addP2Bomb((short) (p2BombOriginX + 15), (short) (p2BombOriginY - 40 * (7 - ((bombs & 0b11110000) >> 4))), (short) (10));
+    addP2Bomb((short) (p2BombOriginX - 15), (short) (p2BombOriginY - 40 * (7 - ((bombs & 0b11110000) >> 4))), (short) 10); // How did we, collectively, let "(short) 10" happen?
+    addP2Bomb((short) (p2BombOriginX + 15), (short) (p2BombOriginY - 40 * (7 - ((bombs & 0b11110000) >> 4))), (short) 10);
     addP2Bomb((short) (p2BombOriginX - 23 * (7 - ((bombs & 0b11110000) >> 4))), (short) (p2BombOriginY - 37 * (7 - ((bombs & 0b11110000) >> 4))), (short) (10));
     addP2Bomb((short) (p2BombOriginX + 23 * (7 - ((bombs & 0b11110000) >> 4))), (short) (p2BombOriginY - 37 * (7 - ((bombs & 0b11110000) >> 4))), (short) (10));
     
@@ -718,15 +797,17 @@ void draw() {
   
   
   // Other tasks
-  /*
-    if (frameType)
-      addBullet((short) random(1, 400), (short) 20, 0, (byte) 3); // I'm about to lose it I'm about to freak out man
-  */
   
-  // if (frameCount == 1) {addEnemy(new TestComp((short) 200, (short) 100)); refreshing = true;}
+  if (simulatedFrames == 1) {addEnemy(new S1Tank((short) 200, (short) 175)); refreshing = true;}
   
-  if (frameCount == 1) {addEnemy(new DollarStoreHibachi((short) 200, (short) 100));}
-    
+  
+  // Check if the player wants to pause
+  if (pausePressed && canPause) {
+    paused = true;
+    canPause = false;
+  } else if (!pausePressed && !canPause)
+    canPause = true;
+  
   
   // Redraw the screen (refer to the "refresh" tab)
   if (refreshing) refresh();

@@ -55,6 +55,8 @@ void removePlayerShot(byte index, boolean player) {
     
     // Player 1
     
+    if (index >= p1ShotX.length) return;
+    
     p1ShotCount--;
     
     short[] tempX = new short[p1ShotX.length - 1];
@@ -80,6 +82,8 @@ void removePlayerShot(byte index, boolean player) {
     
     // Player 2
     
+    if (index >= p2ShotX.length) return;
+    
     p2ShotCount--;
     
     short[] tempX = new short[p2ShotX.length - 1];
@@ -104,13 +108,41 @@ void removePlayerShot(byte index, boolean player) {
   }
 }
 
-void addBullet(float x, float y, short dir, byte speed, byte type, byte size) {
+void markPlayerShotForRemoval(byte index, boolean player) {
+  if (player) {
+    
+    byte[] temp = new byte[p1ShotRemoval.length + 1];
+  
+    for (short i = 0; i < p1ShotRemoval.length; i++) {
+      temp[i] = p1ShotRemoval[i];
+    }
+    
+    temp[temp.length - 1] = index;
+    
+    p1ShotRemoval = temp;
+    
+  } else {
+    
+    byte[] temp = new byte[p2ShotRemoval.length + 1];
+  
+    for (short i = 0; i < p2ShotRemoval.length; i++) {
+      temp[i] = p2ShotRemoval[i];
+    }
+    
+    temp[temp.length - 1] = index;
+    
+    p2ShotRemoval = temp;
+    
+  }
+}
+
+void addBullet(float x, float y, float dir, byte speed, byte type, byte size) {
   
   bulletCount++;
   
   float[] tempX = new float[bulletX.length + 1];
   float[] tempY = new float[bulletY.length + 1];
-  short[] tempD = new short[bulletDir.length + 1];
+  float[] tempD = new float[bulletDir.length + 1];
   byte[] tempSp = new byte[bulletSpd.length + 1];
   byte[] tempT = new byte[bulletType.length + 1];
   byte[] tempSi = new byte[bulletSize.length + 1];
@@ -146,7 +178,7 @@ void removeBullet(short index) {
   
   float[] tempX = new float[bulletX.length - 1];
   float[] tempY = new float[bulletY.length - 1];
-  short[] tempD = new short[bulletDir.length - 1];
+  float[] tempD = new float[bulletDir.length - 1];
   byte[] tempSp = new byte[bulletSpd.length - 1];
   byte[] tempT = new byte[bulletType.length - 1];
   byte[] tempSi = new byte[bulletSize.length - 1];
@@ -186,9 +218,13 @@ void addEnemy(EnemyComp enemy) {
   
   enemies = temp;
   
+  enemy.init(); // Run post-constructor init
+  
 }
 
 void removeEnemy(short index) {
+  
+  if (enemies[index].parent != null) {enemies[index].parent.removeComp(enemies[index]);} // Tell the enemy's parent to remove itself from its "children" array
   
   EnemyComp[] temp = new EnemyComp[enemies.length - 1];
   boolean skipped = false;

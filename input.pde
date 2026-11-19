@@ -129,6 +129,11 @@ void keyPressed() {
         conB = (byte) (conB | 0b1);
         break;
       
+      // Pause
+      case 'b':
+        pausePressed = true;
+        break;
+      
     }
   }
 }
@@ -222,6 +227,11 @@ void keyReleased() {
       // P2 Start
       case '0':
         conB = (byte) (conB & 0b11111110);
+        break;
+      
+      // Pause
+      case 'b':
+        pausePressed = false;
         break;
       
     }

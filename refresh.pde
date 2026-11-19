@@ -24,13 +24,13 @@ void refresh() {
     - P1 bomb count
     - P2 bomb count
     - Last process time (optional)
+    - Pause text
     
     The further an item is down the list, the higher priority they get when displaying.
   */
   
   // Draw enemies
   for (short i = 0; i < enemies.length; i++) {
-    enemies[i].prePaint();
     enemies[i].paint();
   }
   
@@ -175,6 +175,7 @@ void refresh() {
   }
   
   // Draw enemy bullets
+  stroke(0, 0, 0);
   strokeWeight(1);
   for (short i = 0; i < bulletX.length; i++) {
     
@@ -193,6 +194,15 @@ void refresh() {
       case B_BLUEBALL:
         fill(127, 127, 255);
         circle(bulletX[i], bulletY[i], 10);
+        break;
+      
+      case B_YELLOWLARGE:
+        fill(195, 195, 0);
+        pushMatrix();
+        translate(bulletX[i], bulletY[i]);
+        rotate((float) Math.toRadians(180 - bulletDir[i]));
+        triangle(0, -20, -10, 20, 10, 20);
+        popMatrix();
         break;
       
       default:
@@ -252,4 +262,8 @@ void refresh() {
   // Last process time
   fill(255, 255, 255);
   text(Math.round(lastProcessTime / 100), 0, 50);
+  
+  // Pause text
+  if (paused)
+    text("PAUSE", 0, 70);
 }
