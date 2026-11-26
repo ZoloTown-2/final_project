@@ -35,7 +35,16 @@ final byte WORSHOT = 11; // Wide right option shot (P2 option)
 final byte B_ORANGEBALL = 0;
 final byte B_PINKBALL = 1;
 final byte B_BLUEBALL = 2;
-final byte B_YELLOWLARGE = 3;
+final byte B_ORANGESPIKE = 3;
+final byte B_PINKSPIKE = 4;
+final byte B_BLUESPIKE = 5;
+final byte B_YELLOWLARGE = 6;
+final byte B_BOMB = 7;
+
+
+// Font variables
+PFont smallText;
+PFont bigText;
 
 
 // Player variables
@@ -124,8 +133,37 @@ boolean subFrameType = false; // For 15 FPS operations
 boolean subSubFrameType = false; // For 7.5 FPS operations
 
 
+// Menu variables
+byte menuItem;
+
+/*
+  01234567
+  
+  0-4: Unused
+  5: Can select
+  6: Can go up
+  7: Can go down
+*/
+byte canGo;
+
+boolean inTitle = true;
+
+
 // Misc variables
+String centerText = "";
+
 long lastProcessTime = 0;
+
+short timeUntilBossSpawn;
+
+short centerTextTimer;
+short centerTextX, centerTextY;
+
+byte stage;
+
+boolean spawningBoss;
+boolean generallySpawningBosses = true;
+
 boolean refreshing = false;
 
 boolean pausePressed = false;
@@ -166,8 +204,20 @@ byte[] bulletSize = new byte[0];
 EnemyComp[] enemies = new EnemyComp[0];
 
 
+// Menu arrays
+String[] menuItems;
+
+
 // General methods
 double pointTo(short x1, short y1, short x2, short y2) {return Math.toDegrees(Math.atan2(x1 - x2, y1 - y2)) + 180;}
+
+short plyX(boolean player) {return player ? (((stocks & 0b1000000) == 0b1000000) ? p1X : (((stocks & 0b10000000) == 0b10000000) ? p2X : p1X)) : (((stocks & 0b10000000) == 0b10000000) ? p2X : p1X);}
+short plyY(boolean player) {return player ? (((stocks & 0b1000000) == 0b1000000) ? p1Y : (((stocks & 0b10000000) == 0b10000000) ? p2Y : p1Y)) : (((stocks & 0b10000000) == 0b10000000) ? p2Y : p1Y);}
+
+// true = P1; false = P2
+boolean nearestPlayer(short x, short y) {return ((stocks & 0b10000000) == 0b10000000) ? (((stocks & 0b1000000) == 0b1000000) ? (dist(x, y, p1X, p1Y) <= dist(x, y, p2X, p2Y)) : false) : true;}
+
+boolean randomPlayer() {return ((stocks & 0b10000000) == 0b10000000) ? (((stocks & 0b1000000) == 0b1000000) ? (random(0, 2) == 1) : false) : true;}
 
 
 // Initialization
@@ -176,18 +226,66 @@ void setup() {
   frameRate(Integer.MAX_VALUE); // I have implemented my own frame throttling system; I don't know if Processing accomodates for processing time by default
   //noSmooth();
   
+  smallText = createFont("SansSerif", 12);
+  bigText = createFont("SansSerif", 32);
+  
+  menuItems = new String[] {"Start", "Exit"};
+  
   refresh();
 }
 
 
 // Per frame
 void draw() {
+  if (inTitle) {
+    
+    if (((conA & 0b10000000) == 0b10000000 || (conB & 0b10000000) == 0b10000000) && ((canGo & 0b10) == 0b10)) {
+      canGo = (byte) (canGo & 0b11111101);
+      if (menuItem > 0) {menuItem--; refreshing = true;}
+    } else if (((conA & 0b10000000) == 0 && (conB & 0b10000000) == 0) && ((canGo & 0b10) == 0))
+      canGo = (byte) (canGo | 0b10);
+    
+    if (((conA & 0b1000000) == 0b1000000 || (conB & 0b1000000) == 0b1000000) && ((canGo & 0b1) == 0b1)) {
+      canGo = (byte) (canGo & 0b11111110);
+      if (menuItem < menuItems.length - 1) {menuItem++; refreshing = true;}
+    } else if (((conA & 0b1000000) == 0 && (conB & 0b1000000) == 0) && ((canGo & 0b1) == 0))
+      canGo = (byte) (canGo | 0b1);
+    
+    if (((conA & 0b1000) == 0b1000 || (conB & 0b1000) == 0b1000) && ((canGo & 0b100) == 0b100)) {
+      canGo = (byte) (canGo & 0b11111011);
+      switch (menuItem) {
+        
+        // Start
+        case 0:
+          inTitle = false;
+          refreshing = true;
+          break;
+        
+        // Exit
+        case 1:
+          System.exit(0);
+          break;
+        
+        default:
+          println("Bogus menuItem: " + menuItem);
+        
+      }
+    } else if (((conA & 0b1000) == 0 && (conB & 0b1000) == 0) && ((canGo & 0b100) == 0))
+      canGo = (byte) (canGo | 0b100);
+    
+    if (refreshing) refresh();
+    
+    return;
+    
+  }
+  
   if (paused) {
     refreshing = false;
     
     if (pausePressed && canPause) {
       paused = false;
       canPause = false;
+      refresh();
     }
     else if (!pausePressed && !canPause)
       canPause = true;
@@ -638,42 +736,57 @@ void draw() {
   // Advance enemy bullets (the fun part)
   for (short i = 0; i < bulletX.length; i++) { // Yes, I'm going as far as to say "short" instead of "byte"
     
-    bulletX[i] += Math.sin(Math.toRadians(bulletDir[i])) * bulletSpd[i]; // Convert degrees to radians on the go
-    bulletY[i] += Math.cos(Math.toRadians(bulletDir[i])) * bulletSpd[i];
-    
-    boolean differing = true; // Are we changing the properties of this bullet?
-    for (short j = 0; j < bulletRemoval.length; j++) {if (bulletRemoval[j] == i) {differing = false; break;}}
-    
-    // Check if we are outside bounds or touching P1 bomb
-    if (
-      differing &&
-      (
-        bulletX[i] < -32 || bulletX[i] > 432 || bulletY[i] < -32 || bulletY[i] > 432 ||
+    if (bulletType[i] == B_BOMB) {
+      
+      // Enemy bombs
+      
+      bulletSpd[i]--; // bulletSpd is now lifespan duration
+      
+      if (bulletSpd[i] <= 0)
+        markBulletForRemoval(i);
+      
+    } else {
+      
+      // Enemy bullets (everything else)
+      
+      bulletX[i] += Math.sin(Math.toRadians(bulletDir[i])) * bulletSpd[i]; // Convert degrees to radians on the go
+      bulletY[i] += Math.cos(Math.toRadians(bulletDir[i])) * bulletSpd[i];
+      
+      boolean differing = true; // Are we changing the properties of this bullet?
+      for (short j = 0; j < bulletRemoval.length; j++) {if (bulletRemoval[j] == i) {differing = false; break;}}
+      
+      // Check if we are outside bounds or touching P1 bomb
+      if (
+        differing &&
         (
-          (bombInfo & 0b10) == 0b10 && (bulletX[i] > p1BombX - p1BombSize / 2 && bulletX[i] < p1BombX + p1BombSize / 2) &&
-          (bulletY[i] > p1BombY - p1BombSize / 2 && bulletY[i] < p1BombY + p1BombSize / 2)
+          bulletX[i] < -32 || bulletX[i] > 432 || bulletY[i] < -32 || bulletY[i] > 432 ||
+          (
+            (bombInfo & 0b10) == 0b10 && (bulletX[i] > p1BombX - p1BombSize / 2 && bulletX[i] < p1BombX + p1BombSize / 2) &&
+            (bulletY[i] > p1BombY - p1BombSize / 2 && bulletY[i] < p1BombY + p1BombSize / 2)
+          )
         )
-      )
-    ) {markBulletForRemoval(i);}
-    
-    // Check if we are touching P2 bombs
-    if ((bombInfo & 0b1) == 0b1) {
+      ) {markBulletForRemoval(i);}
       
-      short[] tempX = p2BombX.clone();
-      short[] tempY = p2BombY.clone();
-      short[] tempS = p2BombSize.clone();
-      
-      for (short j = 0; j < tempX.length; j++) {
-        differing = true;
-        for (short k = 0; k < bulletRemoval.length; k++) {if (bulletRemoval[k] == i) {differing = false; break;}}
+      // Check if we are touching P2 bombs
+      if ((bombInfo & 0b1) == 0b1) {
         
-        if (
-          differing &&
-          (bulletX[i] > tempX[j] - tempS[j] / 2 && bulletX[i] < tempX[j] + tempS[j] / 2) &&
-          (bulletY[i] > tempY[j] - tempS[j] / 2 && bulletY[i] < tempY[j] + tempS[j] / 2)
-        ) {markBulletForRemoval(i); break;}
+        short[] tempX = p2BombX.clone();
+        short[] tempY = p2BombY.clone();
+        short[] tempS = p2BombSize.clone();
+        
+        for (short j = 0; j < tempX.length; j++) {
+          differing = true;
+          for (short k = 0; k < bulletRemoval.length; k++) {if (bulletRemoval[k] == i) {differing = false; break;}}
+          
+          if (
+            differing &&
+            (bulletX[i] > tempX[j] - tempS[j] / 2 && bulletX[i] < tempX[j] + tempS[j] / 2) &&
+            (bulletY[i] > tempY[j] - tempS[j] / 2 && bulletY[i] < tempY[j] + tempS[j] / 2)
+          ) {markBulletForRemoval(i); break;}
+        }
+          
       }
-        
+      
     }
     
     // Check if we are touching either of the players (if they are playing)
@@ -798,13 +911,90 @@ void draw() {
   
   // Other tasks
   
-  if (simulatedFrames == 1) {addEnemy(new S1Tank((short) 200, (short) 175)); refreshing = true;}
+  // if (simulatedFrames == 1) {addEnemy(new S1Tank((short) 200, (short) 75)); refreshing = true;}
+  // if (simulatedFrames == 1) {addEnemy(new S2Fortress((short) 200, (short) 0)); refreshing = true;}
+  // if (simulatedFrames == 1) {addEnemy(new S3Aircraft((short) 200, (short) 100)); refreshing = true;}
+  
+  boolean bossAbsent = true;
+  
+  if (generallySpawningBosses && spawningBoss) {
+    
+    timeUntilBossSpawn--;
+    
+    if (timeUntilBossSpawn < 0) {
+      spawningBoss = false;
+      
+      switch (stage) {
+        
+        case 1:
+          centerText = "Stage 1: Tank";
+          centerTextX = 100;
+          centerTextY = 100;
+          addEnemy(new S1Tank((short) 200, (short) 75));
+          break;
+        
+        case 2:
+          centerText = "Stage 2: Fortress";
+          centerTextX = 85;
+          centerTextY = 100;
+          addEnemy(new S2Fortress((short) 200, (short) 0));
+          break;
+        
+        case 3:
+          centerText = "Stage 3: Aircraft";
+          centerTextX = 100;
+          centerTextY = 100;
+          addEnemy(new S3Aircraft((short) 200, (short) 100));
+          break;
+        
+        case 4:
+          centerText = "Complete!";
+          centerTextX = 115;
+          centerTextY = 100;
+          generallySpawningBosses = false;
+          break;
+        
+        default:
+          centerText = "Error loading boss #" + stage;
+          centerTextX = 75;
+          centerTextY = 100;
+        
+      }
+      
+      centerTextTimer = 240;
+      refreshing = true;
+    }
+    
+  } else if (generallySpawningBosses) {
+    
+    for (byte i = 0; i < enemies.length; i++) {
+      if (
+        enemies[i] instanceof S1Tank ||
+        enemies[i] instanceof S2Fortress ||
+        enemies[i] instanceof S3Aircraft
+      ) {bossAbsent = false; break;}
+    }
+    
+    if (bossAbsent) {
+      stage++;
+      timeUntilBossSpawn = 180;
+      spawningBoss = true;
+    }
+    
+  }
+  
+  if (centerTextTimer > 0) {
+    centerTextTimer--;
+    if (centerTextTimer == 0)
+      refreshing = true;
+  }
   
   
   // Check if the player wants to pause
   if (pausePressed && canPause) {
     paused = true;
     canPause = false;
+    refreshing = true;
   } else if (!pausePressed && !canPause)
     canPause = true;
   
@@ -819,3 +1009,15 @@ void draw() {
     try {TimeUnit.NANOSECONDS.sleep(16666667);} catch (InterruptedException ex) {}
   }
 }
+
+// If high-scores are added:
+
+/*
+
+  1st     100000 T CAV
+  2nd      70000 A RAI
+  3rd      50000 3 TOA
+  4th      30000 2 PSI
+  5th      10000 1 NMK
+
+*/

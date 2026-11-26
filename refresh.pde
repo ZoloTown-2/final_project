@@ -1,9 +1,31 @@
+// Redraw the title screen
+void refreshTitle() {
+  
+  textFont(bigText);
+  text("Final Project", 50, 100);
+  
+  textFont(smallText);
+  text("Location Test", 50, 300);
+  text("ESD 11/25/2026", 50, 320);
+  
+  for (byte i = 0; i < menuItems.length; i++) {
+    text(menuItems[i], 75, 150 + i * 25);
+  }
+  
+  circle(50, 150 + menuItem * 20, 10);
+  
+}
+
 // Redraw the screen
 void refresh() {
   background(0, 0, 0);
   
   stroke(0, 0, 0);
   strokeWeight(1);
+  
+  textFont(smallText);
+  
+  if (inTitle) {refreshTitle(); return;}
   
   short optionFinalX;
   
@@ -23,6 +45,9 @@ void refresh() {
     - Enemy bullets
     - P1 bomb count
     - P2 bomb count
+    - "[P1] Press 1 to start"
+    - "[P2] Press 0 to start"
+    - Center text
     - Last process time (optional)
     - Pause text
     
@@ -106,7 +131,7 @@ void refresh() {
       vertex(p2X - 9, p2Y + 10);
       vertex(p2X, p2Y + 7);
       vertex(p2X + 9, p2Y + 10);
-      endShape();
+      endShape(CLOSE);
       
     }
     
@@ -168,7 +193,7 @@ void refresh() {
       vertex(p1X - 8, p1Y + 12);
       vertex(p1X, p1Y + 6);
       vertex(p1X + 8, p1Y + 12);
-      endShape();
+      endShape(CLOSE);
       
     }
   
@@ -179,25 +204,63 @@ void refresh() {
   strokeWeight(1);
   for (short i = 0; i < bulletX.length; i++) {
     
+    // I separated the colouring and the drawing so I didn't have to repeat instructions many times.
+    // The bomb is skipped in colouring as it changes colour as it is being drawn, and becaues there is nothing like it so its instructions won't/shouldn't be copied.
+    
     switch (bulletType[i]) {
       
       case B_ORANGEBALL:
+      case B_ORANGESPIKE:
         fill(255, 127, 0);
-        circle(bulletX[i], bulletY[i], 10);
         break;
       
       case B_PINKBALL:
+      case B_PINKSPIKE:
         fill(255, 127, 223);
-        circle(bulletX[i], bulletY[i], 10);
         break;
       
       case B_BLUEBALL:
+      case B_BLUESPIKE:
         fill(127, 127, 255);
-        circle(bulletX[i], bulletY[i], 10);
         break;
       
       case B_YELLOWLARGE:
         fill(195, 195, 0);
+        break;
+      
+      case B_BOMB:
+        break;
+      
+      default:
+        println("Bad bullet type. (index #" + i + ") [Colour section]");
+      
+    }
+    
+    switch (bulletType[i]) {
+      
+      case B_ORANGEBALL:
+        circle(bulletX[i], bulletY[i], 10);
+        break;
+      
+      case B_PINKBALL:
+        circle(bulletX[i], bulletY[i], 10);
+        break;
+      
+      case B_BLUEBALL:
+        circle(bulletX[i], bulletY[i], 10);
+        break;
+      
+      case B_ORANGESPIKE:
+      case B_PINKSPIKE:
+      case B_BLUESPIKE:
+        pushMatrix();
+        translate(bulletX[i], bulletY[i]);
+        rotate((float) Math.toRadians(180 - bulletDir[i]));
+        triangle(0, -8, -4, 8, 4, 8);
+        popMatrix();
+        break;
+      
+      case B_YELLOWLARGE:
         pushMatrix();
         translate(bulletX[i], bulletY[i]);
         rotate((float) Math.toRadians(180 - bulletDir[i]));
@@ -205,13 +268,21 @@ void refresh() {
         popMatrix();
         break;
       
+      case B_BOMB:
+        fill(255, 0, 0);
+        circle(bulletX[i], bulletY[i], subFrameType ? 45 : 60);
+        fill(255, 127, 0);
+        circle(bulletX[i], bulletY[i], subFrameType ? 30 : 40);
+        fill(255, 255, 0);
+        circle(bulletX[i], bulletY[i], subFrameType ? 15 : 20);
+        break;
+      
       default:
-        println("Bad bullet type. (index #" + i + ")");
+        println("Bad bullet type. (index #" + i + ") [Shape section]");
       
     }
     
   }
-  
   
   // Is P1 playing? (for HUD)
   if ((plyManagement & 0b100000) == 0b100000) {
@@ -231,9 +302,12 @@ void refresh() {
       vertex(i * 10 + 4, 36);
       vertex(i * 10 + 8, 32);
       vertex(i * 10 + 12, 36);
-      endShape();
+      endShape(CLOSE);
       
     }
+  } else {
+    fill(0, 255, 0);
+    text("[P1] Press 1 to join", 3, 15);
   }
   
   // Is P2 playing? (for HUD)
@@ -254,9 +328,19 @@ void refresh() {
       vertex(400 + (i * -10) - 3, 36);
       vertex(400 + (i * -10) - 8, 34);
       vertex(400 + (i * -10) - 13, 36);
-      endShape();
+      endShape(CLOSE);
       
     }
+  } else {
+    fill(0, 255, 0);
+    text("[P2] Press 0 to join", 295, 15);
+  }
+  
+  if (centerTextTimer > 0) {
+    fill(255, 255, 255);
+    textFont(bigText);
+    text(centerText, centerTextX, centerTextY);
+    textFont(smallText);
   }
   
   // Last process time
