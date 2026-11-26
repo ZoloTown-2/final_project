@@ -147,7 +147,6 @@ byte menuItem;
 byte canGo;
 
 boolean inTitle = true;
-boolean inSettings = false;
 
 
 // Misc variables
@@ -239,8 +238,7 @@ void setup() {
   smallText = createFont("SansSerif", scaledVisuals ? 24 : 12);
   bigText = createFont("SansSerif", scaledVisuals ? 64 : 32);
   
-  menuItems = new String[] {"Start", "Settings", "Exit"};
-  
+  menuItems = new String[] {"Start", "Exit"};
   refresh();
 }
 
@@ -269,14 +267,6 @@ void draw() {
         refreshing = true;
       } else if (menuItems[menuItem].equals("Exit")) {
         System.exit(0);
-      } else if (menuItems[menuItem].equals("Settings")) {
-        inSettings = true;
-        menuItem = 0;
-        menuItems = new String[] {"Back"};
-      } else if (menuItems[menuItem].equals("Back")) {
-        inSettings = false;
-        menuItem = 0;
-        menuItems = new String[] {"Start", "Settings", "Exit"};
       } else {
         println("Bogus menuItem: " + menuItems[menuItem]);
       }
