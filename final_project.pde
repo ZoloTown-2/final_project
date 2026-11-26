@@ -147,6 +147,7 @@ byte menuItem;
 byte canGo;
 
 boolean inTitle = true;
+boolean inSettings = false;
 
 
 // Misc variables
@@ -169,6 +170,12 @@ boolean refreshing = false;
 boolean pausePressed = false;
 boolean paused = false;
 boolean canPause = true;
+
+
+// SET TO TRUE OR FALSE FOR SCREEN SIZE!
+boolean scaledVisuals = true;
+
+short winSize = (short) (scaledVisuals ? 800 : 400);
 
 
 // Player arrays
@@ -221,15 +228,18 @@ boolean randomPlayer() {return ((stocks & 0b10000000) == 0b10000000) ? (((stocks
 
 
 // Initialization
+void settings() {
+  size(winSize, winSize);
+}
+
 void setup() {
-  size(400, 400);
   frameRate(Integer.MAX_VALUE); // I have implemented my own frame throttling system; I don't know if Processing accomodates for processing time by default
   //noSmooth();
   
-  smallText = createFont("SansSerif", 12);
-  bigText = createFont("SansSerif", 32);
+  smallText = createFont("SansSerif", scaledVisuals ? 24 : 12);
+  bigText = createFont("SansSerif", scaledVisuals ? 64 : 32);
   
-  menuItems = new String[] {"Start", "Exit"};
+  menuItems = new String[] {"Start", "Settings", "Exit"};
   
   refresh();
 }
@@ -237,6 +247,7 @@ void setup() {
 
 // Per frame
 void draw() {
+  
   if (inTitle) {
     
     if (((conA & 0b10000000) == 0b10000000 || (conB & 0b10000000) == 0b10000000) && ((canGo & 0b10) == 0b10)) {
@@ -253,22 +264,21 @@ void draw() {
     
     if (((conA & 0b1000) == 0b1000 || (conB & 0b1000) == 0b1000) && ((canGo & 0b100) == 0b100)) {
       canGo = (byte) (canGo & 0b11111011);
-      switch (menuItem) {
-        
-        // Start
-        case 0:
-          inTitle = false;
-          refreshing = true;
-          break;
-        
-        // Exit
-        case 1:
-          System.exit(0);
-          break;
-        
-        default:
-          println("Bogus menuItem: " + menuItem);
-        
+      if (menuItems[menuItem].equals("Start")) {
+        inTitle = false;
+        refreshing = true;
+      } else if (menuItems[menuItem].equals("Exit")) {
+        System.exit(0);
+      } else if (menuItems[menuItem].equals("Settings")) {
+        inSettings = true;
+        menuItem = 0;
+        menuItems = new String[] {"Back"};
+      } else if (menuItems[menuItem].equals("Back")) {
+        inSettings = false;
+        menuItem = 0;
+        menuItems = new String[] {"Start", "Settings", "Exit"};
+      } else {
+        println("Bogus menuItem: " + menuItems[menuItem]);
       }
     } else if (((conA & 0b1000) == 0 && (conB & 0b1000) == 0) && ((canGo & 0b100) == 0))
       canGo = (byte) (canGo | 0b100);
@@ -935,21 +945,21 @@ void draw() {
         
         case 2:
           centerText = "Stage 2: Fortress";
-          centerTextX = 85;
+          centerTextX = 82;
           centerTextY = 100;
           addEnemy(new S2Fortress((short) 200, (short) 0));
           break;
         
         case 3:
           centerText = "Stage 3: Aircraft";
-          centerTextX = 100;
+          centerTextX = 95;
           centerTextY = 100;
           addEnemy(new S3Aircraft((short) 200, (short) 100));
           break;
         
         case 4:
           centerText = "Complete!";
-          centerTextX = 115;
+          centerTextX = 118;
           centerTextY = 100;
           generallySpawningBosses = false;
           break;

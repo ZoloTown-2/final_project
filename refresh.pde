@@ -1,18 +1,43 @@
+// Scale visuals if necessary
+int sca(int val) {return (short) (scaledVisuals ? val * 2 : val);}
+
 // Redraw the title screen
 void refreshTitle() {
   
+  fill(127, 127, 127, 127);
+  beginShape();
+  vertex(sca(230), sca(152));
+  vertex(sca(198), sca(248));
+  vertex(sca(230), sca(224));
+  vertex(sca(262), sca(248));
+  endShape(CLOSE);
+  
+  beginShape();
+  vertex(sca(330), sca(176));
+  vertex(sca(294), sca(248));
+  vertex(sca(330), sca(230));
+  vertex(sca(366), sca(248));
+  endShape(CLOSE);
+  
+  fill(255, 255, 255);
   textFont(bigText);
-  text("Final Project", 50, 100);
+  text("final_project", sca(50), sca(100));
   
   textFont(smallText);
-  text("Location Test", 50, 300);
-  text("ESD 11/25/2026", 50, 320);
+  text("Master ver.", sca(50), sca(300));
+  text("ESD 11/26/2026", sca(50), sca(320));
   
   for (byte i = 0; i < menuItems.length; i++) {
-    text(menuItems[i], 75, 150 + i * 25);
+    text(menuItems[i], sca(75), sca(150 + i * 25));
   }
   
-  circle(50, 150 + menuItem * 20, 10);
+  // circle(sca(50), sca(145 + menuItem * 25), sca(10));
+  beginShape();
+  vertex(sca(45), sca((int) (140 + menuItem * 25)));
+  vertex(sca(55), sca((int) (145 + menuItem * 25)));
+  vertex(sca(45), sca((int) (150 + menuItem * 25)));
+  vertex(sca(48), sca((int) (145 + menuItem * 25)));
+  endShape(CLOSE);
   
 }
 
@@ -21,7 +46,7 @@ void refresh() {
   background(0, 0, 0);
   
   stroke(0, 0, 0);
-  strokeWeight(1);
+  strokeWeight(sca(1));
   
   textFont(smallText);
   
@@ -63,14 +88,14 @@ void refresh() {
   // Draw P1 bomb
   if ((bombInfo & 0b10) == 0b10) {
     fill(223, 191, 0);
-    circle(p1BombX, p1BombY, p1BombSize);
+    circle(sca(p1BombX), sca(p1BombY), sca(p1BombSize));
   }
   
   // Draw P2 bomb
   if ((bombInfo & 0b1) == 0b1) {
     fill(223, 191, 0);
     for (byte i = 0; i < p2BombX.length; i++) {
-      circle(p2BombX[i], p2BombY[i], p2BombSize[i]);
+      circle(sca(p2BombX[i]), sca(p2BombY[i]), sca(p2BombSize[i]));
     }
   }
   
@@ -88,7 +113,7 @@ void refresh() {
         case WRSHOT:
           fill(191, 191, 255);
           // rect(p2ShotX[i] - 3, p2ShotY[i] - 7, 6, 14);
-          triangle(p2ShotX[i], p2ShotY[i] - 7, p2ShotX[i] - 3, p2ShotY[i] + 7, p2ShotX[i] + 3, p2ShotY[i] + 7);
+          triangle(sca(p2ShotX[i]), sca(p2ShotY[i] - 7), sca(p2ShotX[i] - 3), sca(p2ShotY[i] + 7), sca(p2ShotX[i] + 3), sca(p2ShotY[i] + 7));
           break;
         
         case WOLSHOT:
@@ -96,7 +121,7 @@ void refresh() {
         case WOMSHOT:
           fill(127, 127, 191);
           // rect(p2ShotX[i] - 2, p2ShotY[i] - 5, 4, 10);
-          triangle(p2ShotX[i], p2ShotY[i] - 6, p2ShotX[i] - 2, p2ShotY[i] + 6, p2ShotX[i] + 2, p2ShotY[i] + 6);
+          triangle(sca(p2ShotX[i]), sca(p2ShotY[i] - 6), sca(p2ShotX[i] - 2), sca(p2ShotY[i] + 6), sca(p2ShotX[i] + 2), sca(p2ShotY[i] + 6));
           break;
           
         default:
@@ -110,27 +135,27 @@ void refresh() {
       // Draw player 2 options
       // Apply translucence if invulnerable
       if (p2IFrames > 0) {fill(95, 95, 255, 127); stroke(0, 0, 0, 127);} else {fill(95, 95, 255); stroke(0, 0, 0);}
-      strokeWeight(1);
+      strokeWeight(sca(1));
       
       optionFinalX = (short) (p2X + ((p1OX - 25) * ((float) p2OMag / 25)));
-      triangle(optionFinalX - 3, p2Y + 5, optionFinalX - 7, p2Y + 14, optionFinalX + 2, p2Y + 12);
+      triangle(sca(optionFinalX - 3), sca(p2Y + 5), sca(optionFinalX - 7), sca(p2Y + 14), sca(optionFinalX + 2), sca(p2Y + 12));
       
       optionFinalX = (short) (p2X - ((p1OX - 25) * ((float) p2OMag / 25)));
-      triangle(optionFinalX + 3, p2Y + 5, optionFinalX - 2, p2Y + 12, optionFinalX + 7, p2Y + 14);
+      triangle(sca(optionFinalX + 3), sca(p2Y + 5), sca(optionFinalX - 2), sca(p2Y + 12), sca(optionFinalX + 7), sca(p2Y + 14));
       
       optionFinalX = (short) (p2X + ((p1OX - 15) * ((float) p2OMag / 25)));
-      triangle(optionFinalX, p2Y, optionFinalX - 5, p2Y + 10, optionFinalX + 5, p2Y + 10);
+      triangle(sca(optionFinalX), sca(p2Y), sca(optionFinalX - 5), sca(p2Y + 10), sca(optionFinalX + 5), sca(p2Y + 10));
       
       optionFinalX = (short) (p2X - ((p1OX - 15) * ((float) p2OMag / 25)));
-      triangle(optionFinalX, p2Y, optionFinalX - 5, p2Y + 10, optionFinalX + 5, p2Y + 10);
+      triangle(sca(optionFinalX), sca(p2Y), sca(optionFinalX - 5), sca(p2Y + 10), sca(optionFinalX + 5), sca(p2Y + 10));
       
       // Draw player 2
       // triangle(p2X, p2Y - 12, p2X - 8, p2Y + 12, p2X + 8, p2Y + 12);
       beginShape();
-      vertex(p2X, p2Y - 10);
-      vertex(p2X - 9, p2Y + 10);
-      vertex(p2X, p2Y + 7);
-      vertex(p2X + 9, p2Y + 10);
+      vertex(sca(p2X), sca(p2Y - 10));
+      vertex(sca(p2X - 9), sca(p2Y + 10));
+      vertex(sca(p2X), sca(p2Y + 7));
+      vertex(sca(p2X + 9), sca(p2Y + 10));
       endShape(CLOSE);
       
     }
@@ -147,7 +172,7 @@ void refresh() {
         
         case LSHOT:
           fill(255, 191, 191);
-          triangle(p1ShotX[i], p1ShotY[i] - 7, p1ShotX[i] - 3, p1ShotY[i] + 7, p1ShotX[i] + 3, p1ShotY[i] + 7);
+          triangle(sca(p1ShotX[i]), sca(p1ShotY[i] - 7), sca(p1ShotX[i] - 3), sca(p1ShotY[i] + 7), sca(p1ShotX[i] + 3), sca(p1ShotY[i] + 7));
           break;
         
         case LOLNSHOT:
@@ -156,7 +181,7 @@ void refresh() {
         case LORFSHOT:
         case LOMSHOT:
           fill(191, 127, 127);
-          triangle(p1ShotX[i], p1ShotY[i] - 6, p1ShotX[i] - 2, p1ShotY[i] + 6, p1ShotX[i] + 2, p1ShotY[i] + 6);
+          triangle(sca(p1ShotX[i]), sca(p1ShotY[i] - 6), sca(p1ShotX[i] - 2), sca(p1ShotY[i] + 6), sca(p1ShotX[i] + 2), sca(p1ShotY[i] + 6));
           break;
           
         default:
@@ -171,28 +196,28 @@ void refresh() {
       // Draw player 1 options
       // Apply translucence if invulnerable
       if (p1IFrames > 0) {fill(255, 63, 63, 127); stroke(0, 0, 0, 127);} else {fill(255, 63, 63); stroke(0, 0, 0);}
-      strokeWeight(1);
+      strokeWeight(sca(1));
       
       optionFinalX = (short) (p1X + ((p1OX - 16) * ((float) p1OMag / 25)));
-      triangle(optionFinalX - 2, p1Y + 5, optionFinalX - 5, p1Y + 13, optionFinalX + 3, p1Y + 13);
+      triangle(sca(optionFinalX - 2), sca(p1Y + 5), sca(optionFinalX - 5), sca(p1Y + 13), sca(optionFinalX + 3), sca(p1Y + 13));
       
       optionFinalX = (short) (p1X - ((p1OX - 16) * ((float) p1OMag / 25)));
-      triangle(optionFinalX + 2, p1Y + 5, optionFinalX - 3, p1Y + 13, optionFinalX + 5, p1Y + 13);
+      triangle(sca(optionFinalX + 2), sca(p1Y + 5), sca(optionFinalX - 3), sca(p1Y + 13), sca(optionFinalX + 5), sca(p1Y + 13));
       
       optionFinalX = (short) (p1X + ((p1OX - 12) * ((float) p1OMag / 25)));
-      triangle(optionFinalX, p1Y - 8, optionFinalX - 5, p1Y + 2, optionFinalX + 5, p1Y + 2);
+      triangle(sca(optionFinalX), sca(p1Y - 8), sca(optionFinalX - 5), sca(p1Y + 2), sca(optionFinalX + 5), sca(p1Y + 2));
       
       optionFinalX = (short) (p1X - ((p1OX - 12) * ((float) p1OMag / 25)));
-      triangle(optionFinalX, p1Y - 8, optionFinalX - 5, p1Y + 2, optionFinalX + 5, p1Y + 2);
+      triangle(sca(optionFinalX), sca(p1Y - 8), sca(optionFinalX - 5), sca(p1Y + 2), sca(optionFinalX + 5), sca(p1Y + 2));
       
       
       // Draw player 1
       // triangle(p1X, p1Y - 12, p1X - 8, p1Y + 12, p1X + 8, p1Y + 12);
       beginShape();
-      vertex(p1X, p1Y - 12);
-      vertex(p1X - 8, p1Y + 12);
-      vertex(p1X, p1Y + 6);
-      vertex(p1X + 8, p1Y + 12);
+      vertex(sca(p1X), sca(p1Y - 12));
+      vertex(sca(p1X - 8), sca(p1Y + 12));
+      vertex(sca(p1X), sca(p1Y + 6));
+      vertex(sca(p1X + 8), sca(p1Y + 12));
       endShape(CLOSE);
       
     }
@@ -201,7 +226,7 @@ void refresh() {
   
   // Draw enemy bullets
   stroke(0, 0, 0);
-  strokeWeight(1);
+  strokeWeight(sca(1));
   for (short i = 0; i < bulletX.length; i++) {
     
     // I separated the colouring and the drawing so I didn't have to repeat instructions many times.
@@ -239,42 +264,36 @@ void refresh() {
     switch (bulletType[i]) {
       
       case B_ORANGEBALL:
-        circle(bulletX[i], bulletY[i], 10);
-        break;
-      
       case B_PINKBALL:
-        circle(bulletX[i], bulletY[i], 10);
-        break;
-      
       case B_BLUEBALL:
-        circle(bulletX[i], bulletY[i], 10);
+        circle(sca((int) bulletX[i]), sca((int) bulletY[i]), sca(10));
         break;
       
       case B_ORANGESPIKE:
       case B_PINKSPIKE:
       case B_BLUESPIKE:
         pushMatrix();
-        translate(bulletX[i], bulletY[i]);
+        translate(sca((int) bulletX[i]), sca((int) bulletY[i]));
         rotate((float) Math.toRadians(180 - bulletDir[i]));
-        triangle(0, -8, -4, 8, 4, 8);
+        triangle(0, sca(-8), sca(-4), sca(8), sca(4), sca(8));
         popMatrix();
         break;
       
       case B_YELLOWLARGE:
         pushMatrix();
-        translate(bulletX[i], bulletY[i]);
+        translate(sca((int) bulletX[i]), sca((int) bulletY[i]));
         rotate((float) Math.toRadians(180 - bulletDir[i]));
-        triangle(0, -20, -10, 20, 10, 20);
+        triangle(0, sca(-20), sca(-10), sca(20), sca(10), sca(20));
         popMatrix();
         break;
       
       case B_BOMB:
         fill(255, 0, 0);
-        circle(bulletX[i], bulletY[i], subFrameType ? 45 : 60);
+        circle(sca((int) bulletX[i]), sca((int) bulletY[i]), sca(subFrameType ? 45 : 60));
         fill(255, 127, 0);
-        circle(bulletX[i], bulletY[i], subFrameType ? 30 : 40);
+        circle(sca((int) bulletX[i]), sca((int) bulletY[i]), sca(subFrameType ? 30 : 40));
         fill(255, 255, 0);
-        circle(bulletX[i], bulletY[i], subFrameType ? 15 : 20);
+        circle(sca((int) bulletX[i]), sca((int) bulletY[i]), sca(subFrameType ? 15 : 20));
         break;
       
       default:
@@ -290,7 +309,7 @@ void refresh() {
     fill(223, 191, 0);
     for (byte i = 0; i < (bombs & 0b11); i++) {
       
-      circle(i * 20 + 12, (p1X < (25 * (bombs & 0b11)) && p1Y > 350) || (p2X < (25 * (bombs & 0b11)) && p2Y > 350) ? 50 : 385, 15);
+      circle(sca(i * 20 + 12), sca((p1X < (25 * (bombs & 0b11)) && p1Y > 350) || (p2X < (25 * (bombs & 0b11)) && p2Y > 350) ? 50 : 385), sca(15));
       
     }
     
@@ -298,16 +317,16 @@ void refresh() {
     for (byte i = 0; i < (stocks & 0b111); i++) {
       
       beginShape();
-      vertex(i * 10 + 8, 24);
-      vertex(i * 10 + 4, 36);
-      vertex(i * 10 + 8, 32);
-      vertex(i * 10 + 12, 36);
+      vertex(sca(i * 10 + 8), sca(24));
+      vertex(sca(i * 10 + 4), sca(36));
+      vertex(sca(i * 10 + 8), sca(32));
+      vertex(sca(i * 10 + 12), sca(36));
       endShape(CLOSE);
       
     }
   } else {
     fill(0, 255, 0);
-    text("[P1] Press 1 to join", 3, 15);
+    text("[P1] Press 1 to join", sca(3), sca(15));
   }
   
   // Is P2 playing? (for HUD)
@@ -316,7 +335,7 @@ void refresh() {
     fill(223, 191, 0);
     for (byte i = 0; i < ((bombs & 0b1100) >> 2); i++) {
       
-      circle(400 + (i * -20 - 12), (p1X > 400 - (25 * ((bombs & 0b1100) >> 2)) && p1Y > 350) || (p2X > 400 - (25 * ((bombs & 0b1100) >> 2)) && p2Y > 350) ? 50 : 385, 15);
+      circle(sca(400 + (i * -20 - 12)), sca((p1X > 400 - (25 * ((bombs & 0b1100) >> 2)) && p1Y > 350) || (p2X > 400 - (25 * ((bombs & 0b1100) >> 2)) && p2Y > 350) ? 50 : 385), sca(15));
       
     }
     
@@ -324,30 +343,32 @@ void refresh() {
     for (byte i = 0; i < ((stocks & 0b111000) >> 3); i++) {
       
       beginShape();
-      vertex(400 + (i * -10) - 8, 26);
-      vertex(400 + (i * -10) - 3, 36);
-      vertex(400 + (i * -10) - 8, 34);
-      vertex(400 + (i * -10) - 13, 36);
+      vertex(sca(400 + (i * -10) - 8), sca(26));
+      vertex(sca(400 + (i * -10) - 3), sca(36));
+      vertex(sca(400 + (i * -10) - 8), sca(34));
+      vertex(sca(400 + (i * -10) - 13), sca(36));
       endShape(CLOSE);
       
     }
   } else {
     fill(0, 255, 0);
-    text("[P2] Press 0 to join", 295, 15);
+    text("[P2] Press 0 to join", sca(295), sca(15));
   }
   
   if (centerTextTimer > 0) {
     fill(255, 255, 255);
     textFont(bigText);
-    text(centerText, centerTextX, centerTextY);
+    text(centerText, sca(centerTextX), sca(centerTextY));
     textFont(smallText);
   }
   
   // Last process time
   fill(255, 255, 255);
-  text(Math.round(lastProcessTime / 100), 0, 50);
+  text(Math.round(lastProcessTime / 100), 0, sca(50));
   
   // Pause text
-  if (paused)
-    text("PAUSE", 0, 70);
+  if (paused) {
+    textFont(bigText);
+    text("PAUSE", sca(150), sca(100));
+  }
 }

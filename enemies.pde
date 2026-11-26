@@ -18,28 +18,28 @@ void drawDestruction(float x, float y, float wid, float hei) {
   hei /= 30;
   
   beginShape();
-  vertex(x - wid * 14, y - hei * 12);
-  vertex(x - wid * 8, y - hei * 8);
-  vertex(x, y - hei * 11);
-  vertex(x + wid * 7, y - hei * 7);
-  vertex(x + wid * 13, y - hei * 11);
-  vertex(x + wid * 16, y - hei * 7);
-  vertex(x + wid * 19, y - hei * 8);
-  vertex(x + wid * 15, y - hei * 2);
-  vertex(x + wid * 20, y - hei * 4);
-  vertex(x + wid * 17, y + hei * 10);
-  vertex(x + wid * 19, y + hei * 13);
-  vertex(x + wid * 14, y + hei * 11);
-  vertex(x + wid * 9, y + hei * 14);
-  vertex(x - wid * 1, y + hei * 10);
-  vertex(x - wid * 7, y + hei * 15);
-  vertex(x - wid * 13, y + hei * 12);
-  vertex(x - wid * 17, y + hei * 13);
-  vertex(x - wid * 15, y + hei * 8);
-  vertex(x - wid * 18, y + hei * 1);
-  vertex(x - wid * 15, y - hei * 6);
-  vertex(x - wid * 20, y - hei * 10);
-  vertex(x - wid * 18, y - hei * 12);
+  vertex(sca((int) (x - wid * 14)), sca((int) (y - hei * 12)));
+  vertex(sca((int) (x - wid * 8)), sca((int) (y - hei * 8)));
+  vertex(sca((int) (x)), sca((int) (y - hei * 11)));
+  vertex(sca((int) (x + wid * 7)), sca((int) (y - hei * 7)));
+  vertex(sca((int) (x + wid * 13)), sca((int) (y - hei * 11)));
+  vertex(sca((int) (x + wid * 16)), sca((int) (y - hei * 7)));
+  vertex(sca((int) (x + wid * 19)), sca((int) (y - hei * 8)));
+  vertex(sca((int) (x + wid * 15)), sca((int) (y - hei * 2)));
+  vertex(sca((int) (x + wid * 20)), sca((int) (y - hei * 4)));
+  vertex(sca((int) (x + wid * 17)), sca((int) (y + hei * 10)));
+  vertex(sca((int) (x + wid * 19)), sca((int) (y + hei * 13)));
+  vertex(sca((int) (x + wid * 14)), sca((int) (y + hei * 11)));
+  vertex(sca((int) (x + wid * 9)), sca((int) (y + hei * 14)));
+  vertex(sca((int) (x - wid * 1)), sca((int) (y + hei * 10)));
+  vertex(sca((int) (x - wid * 7)), sca((int) (y + hei * 15)));
+  vertex(sca((int) (x - wid * 13)), sca((int) (y + hei * 12)));
+  vertex(sca((int) (x - wid * 17)), sca((int) (y + hei * 13)));
+  vertex(sca((int) (x - wid * 15)), sca((int) (y + hei * 8)));
+  vertex(sca((int) (x - wid * 18)), sca((int) (y + hei * 1)));
+  vertex(sca((int) (x - wid * 15)), sca((int) (y - hei * 6)));
+  vertex(sca((int) (x - wid * 20)), sca((int) (y - hei * 10)));
+  vertex(sca((int) (x - wid * 18)), sca((int) (y - hei * 12)));
   endShape(CLOSE);
 }
 
@@ -193,13 +193,13 @@ class BombProjectile extends EnemyComp {
     fill(127, 127, 95);
     
     if (lifeTime % 20 <= 1) {
-      circle(getX(), getY(), 30);
+      circle(sca((int) getX()), sca((int) getY()), sca(30));
       fill(255, 0, 0);
-      circle(getX(), getY(), 15);
+      circle(sca((int) getX()), sca((int) getY()), sca(15));
     } else {
-      circle(getX(), getY(), 24);
+      circle(sca((int) getX()), sca((int) getY()), sca(24));
       fill(255, 0, 0);
-      circle(getX(), getY(), 12);
+      circle(sca((int) getX()), sca((int) getY()), sca(12));
     }
     
   }
@@ -328,7 +328,7 @@ class S1Tank extends EnemyComp {
     }
     
     // Base
-    rect(getX() - 100, getY() - 25, 200, 250);
+    rect(sca((int) (getX() - 100)), sca((int) (getY() - 25)), sca(200), sca(250));
     
     // Destroyed components
     switch (this.management & 0b11) {
@@ -370,7 +370,7 @@ class S1Tank extends EnemyComp {
     drawDestruction(getX() + 62, getY() + 80, 20, 23);
     
     // Misc. components
-    strokeWeight(1);
+    strokeWeight(sca(1));
     
     // Thing in the middle
     switch (this.management & 0b11) {
@@ -392,7 +392,7 @@ class S1Tank extends EnemyComp {
       
     }
     
-    rect(getX() - 15, getY() + 60, 30, 140);
+    rect(sca((int) (getX() - 15)), sca((int) (getY() + 60)), sca(30), sca(140));
     
     switch (this.management & 0b11) {
       
@@ -419,27 +419,27 @@ class S1Tank extends EnemyComp {
       rect(getX() + 100, getY() - 125, 20, 250);
     */
     beginShape();
-    vertex(getX() - 120, getY() - 15);
-    vertex(getX() - 110, getY() - 25);
-    vertex(getX() - 100, getY() - 25);
-    vertex(getX() - 100, getY() + 225);
-    vertex(getX() - 110, getY() + 225);
-    vertex(getX() - 120, getY() + 215);
+    vertex(sca((int) (getX() - 120)), sca((int) (getY() - 15)));
+    vertex(sca((int) (getX() - 110)), sca((int) (getY() - 25)));
+    vertex(sca((int) (getX() - 100)), sca((int) (getY() - 25)));
+    vertex(sca((int) (getX() - 100)), sca((int) (getY() + 225)));
+    vertex(sca((int) (getX() - 110)), sca((int) (getY() + 225)));
+    vertex(sca((int) (getX() - 120)), sca((int) (getY() + 215)));
     endShape(CLOSE); // OPEN messes with the stroke/outlines
     
     beginShape();
-    vertex(getX() + 100, getY() - 25);
-    vertex(getX() + 110, getY() - 25);
-    vertex(getX() + 120, getY() - 15);
-    vertex(getX() + 120, getY() + 215);
-    vertex(getX() + 110, getY() + 225);
-    vertex(getX() + 100, getY() + 225);
+    vertex(sca((int) (getX() + 100)), sca((int) (getY() - 25)));
+    vertex(sca((int) (getX() + 110)), sca((int) (getY() - 25)));
+    vertex(sca((int) (getX() + 120)), sca((int) (getY() - 15)));
+    vertex(sca((int) (getX() + 120)), sca((int) (getY() + 215)));
+    vertex(sca((int) (getX() + 110)), sca((int) (getY() + 225)));
+    vertex(sca((int) (getX() + 100)), sca((int) (getY() + 225)));
     endShape(CLOSE);
     
     // Wheel tracks
     for (byte i = 0; i < 13; i++) {
-      line(getX() - (subSubFrameType ? (((i == 0 || i == 12) ? 115 : 120)) : 120), getY() + (i - 6) * 20 + 100 + (subSubFrameType ? 0 : 10), getX() - 100, getY() + (i - 6) * 20 + 100 + (subSubFrameType ? 0 : 10));
-      line(getX() + 100, getY() + (i - 6) * 20 + 100 + (subSubFrameType ? 0 : 10), getX() + (subSubFrameType ? (((i == 0 || i == 12) ? 115 : 120)) : 120), getY() + (i - 6) * 20 + 100 + (subSubFrameType ? 0 : 10));
+      line(sca((int) (getX() - (subSubFrameType ? (((i == 0 || i == 12) ? 115 : 120)) : 120))), sca((int) (getY() + (i - 6) * 20 + 100 + (subSubFrameType ? 0 : 10))), sca((int) (getX() - 100)), sca((int) (getY() + (i - 6) * 20 + 100 + (subSubFrameType ? 0 : 10))));
+      line(sca((int) (getX() + 100)), sca((int) (getY() + (i - 6) * 20 + 100 + (subSubFrameType ? 0 : 10))), sca((int) (getX() + (subSubFrameType ? (((i == 0 || i == 12) ? 115 : 120)) : 120))), sca((int) (getY() + (i - 6) * 20 + 100 + (subSubFrameType ? 0 : 10))));
     }
     
   }
@@ -529,7 +529,7 @@ class S1Cover extends EnemyComp {
       
     }
     
-    rect(getX() - 30, getY() - 22.5, 60, 45);
+    rect(sca((int) (getX() - 30)), sca((int) (getY() - 22.5)), sca(60), sca(45));
     
   }
   
@@ -604,19 +604,19 @@ class S1Cannon extends EnemyComp {
       
     }
     
-    circle(getX(), getY(), 50);
+    circle(sca((int) getX()), sca((int) getY()), sca(50));
     
     if (leftSide ? s1LCReady : s1RCReady) {
       
       pushMatrix();
-      translate(getX(), getY());
+      translate(sca((int) getX()), sca((int) getY()));
       rotate((float) (0 - Math.toRadians(pointTo((short) getX(), (short) getY(), plyX(targetPly), plyY(targetPly)))));
-      rect(-12.5, -25 - recoil / 10, 25, 50);
+      rect(sca(-12), sca(-25 - recoil / 10), sca(25), sca(50));
       popMatrix();
       
     } else {
       
-      line(getX() - 25, getY(), getX() + 25, getY());
+      line(sca((int) (getX() - 25)), sca((int) getY()), sca((int) (getX() + 25)), sca((int) getY()));
       
     }
     
@@ -699,9 +699,9 @@ class S1FlapCannon extends EnemyComp {
         
       }
       
-      rect(getX() - 25, getY() - 12.5, 50, 25);
+      rect(sca((int) (getX() - 25)), sca((int) (getY() - 12.5)), sca(50), sca(25));
       
-      line(getX() - 25, getY(), getX() + 25, getY());
+      line(sca((int) (getX() - 25)), sca((int) getY()), sca((int) (getX() + 25)), sca((int) getY()));
       
     } else {
       
@@ -728,7 +728,7 @@ class S1FlapCannon extends EnemyComp {
         
       }
       
-      rect(getX() - 25, getY() - 12.5, 50, 25);
+      rect(sca((int) (getX() - 25)), sca((int) (getY() - 12.5)), sca(50), sca(25));
       
       for (byte i = 0; i < 4; i++) {
         switch (this.management & 0b11) {
@@ -749,7 +749,7 @@ class S1FlapCannon extends EnemyComp {
             println(this.getClass().getSimpleName() + ": Bogus enemy flash type: " + (this.management & 0b11));
           
         }
-        circle(getX() + 5 + (i - 2) * 10, getY(), 8);
+        circle(sca((int) (getX() + 5 + (i - 2) * 10)), sca((int) getY()), sca(8));
         
         switch (this.management & 0b11) {
           
@@ -769,10 +769,10 @@ class S1FlapCannon extends EnemyComp {
             println(this.getClass().getSimpleName() + ": Bogus enemy flash type: " + (this.management & 0b11));
           
         }
-        circle(getX() + 5 + (i - 2) * 10, getY(), 6);
+        circle(sca((int) (getX() + 5 + (i - 2) * 10)), sca((int) (getY())), sca(6));
       }
       
-      strokeWeight(1);
+      strokeWeight(sca(1));
       
     }
     
@@ -835,12 +835,12 @@ class S1Turret extends EnemyComp {
       
     }
     
-    circle(getX(), getY(), 35);
+    circle(sca((int) getX()), sca((int) getY()), sca(35));
     
     
     strokeWeight(0);
     pushMatrix();
-    translate(getX(), getY());
+    translate(sca((int) getX()), sca((int) getY()));
     rotate((float) (0 - Math.toRadians(point)));
     
     switch (this.management & 0b11) {
@@ -861,13 +861,13 @@ class S1Turret extends EnemyComp {
         println(this.getClass().getSimpleName() + ": Bogus enemy flash type: " + (this.management & 0b11));
       
     }
-    circle(0, 10, 6);
-    circle(0, -10, 6);
-    circle(10, 0, 6);
-    circle(-10, 0, 6);
+    circle(0, sca(10), sca(6));
+    circle(0, sca(-10), sca(6));
+    circle(sca(10), 0, sca(6));
+    circle(sca(-10), 0, sca(6));
     
     popMatrix();
-    strokeWeight(1);
+    strokeWeight(sca(1));
     
   }
   
@@ -879,13 +879,14 @@ class S2Fortress extends EnemyComp {
   
   short lifeTime = 0;
   boolean goingDown;
+  boolean targetPly = randomPlayer();
 
   S2Fortress(short x, short y) {
     this.x = x;
     this.y = y;
     this.boxWidth = 250;
     this.boxHeight = 50;
-    this.health = 5999;
+    this.health = 5999; // This isn't 6000 so that the phase doesn't get resolved to 3 instead of 2
     this.maxHealth = 5999;
   }
   
@@ -927,6 +928,22 @@ class S2Fortress extends EnemyComp {
           s2P3PointOffset -= 1;
         
       }
+      
+      byte mpTurrets = 0;
+      
+      for (byte i = 0; i < children.length; i++)
+        if (children[i] instanceof S2MPTurret) mpTurrets++;
+      
+      if (mpTurrets < 1 && lifeTime % 20 == 0) {
+        for (byte i = 0; i < 9; i++) {
+          addBullet(getX(), getY(), (float) pointTo((short) getX(), (short) getY(), plyX(targetPly), plyY(targetPly)) + (i - 4) * 12, (byte) 7, B_PINKSPIKE, (byte) 4);
+        }
+      } else if (mpTurrets < 2 && lifeTime % 40 == 0) {
+        for (byte i = 0; i < 5; i++) {
+          addBullet(getX(), getY(), (float) pointTo((short) getX(), (short) getY(), plyX(targetPly), plyY(targetPly)) + (i - 2) * 18, (byte) 4, B_PINKSPIKE, (byte) 4);
+        }
+      }
+      
     }
     
   }
@@ -954,15 +971,50 @@ class S2Fortress extends EnemyComp {
     }
     
     beginShape();
-    vertex(getX() - 200, getY());
-    vertex(getX() + 200, getY());
-    vertex(getX() + 200, getY() + 325);
-    vertex(getX() + 150, getY() + 325);
-    vertex(getX() + 150, getY() + 50);
-    vertex(getX() - 150, getY() + 50);
-    vertex(getX() - 150, getY() + 325);
-    vertex(getX() - 200, getY() + 325);
+    vertex(sca((int) (getX() - 200)), sca((int) getY()));
+    vertex(sca((int) (getX() + 200)), sca((int) getY()));
+    vertex(sca((int) (getX() + 200)), sca((int) (getY() + 325)));
+    vertex(sca((int) (getX() + 150)), sca((int) (getY() + 325)));
+    vertex(sca((int) (getX() + 150)), sca((int) (getY() + 50)));
+    vertex(sca((int) (getX() - 150)), sca((int) (getY() + 50)));
+    vertex(sca((int) (getX() - 150)), sca((int) (getY() + 325)));
+    vertex(sca((int) (getX() - 200)), sca((int) (getY() + 325)));
     endShape(CLOSE);
+    
+    switch (this.management & 0b11) {
+      
+      case FLASH_NONE:
+        fill(31, 31, 31);
+        break;
+      
+      case FLASH_TICK:
+        fill(63, 63, 63);
+        break;
+      
+      case FLASH_LOW:
+        fill(47, 15, 15);
+        break;
+      
+      default:
+        println(this.getClass().getSimpleName() + ": Bogus enemy flash type: " + (this.management & 0b11));
+      
+    }
+    
+    // Destroyed components
+    
+    // Rotators
+    drawDestruction(getX() - 175, getY() + 110, 10, 15);
+    drawDestruction(getX() - 175, getY() + 275, 10, 15);
+    drawDestruction(getX() + 175, getY() + 110, 10, 15);
+    drawDestruction(getX() + 175, getY() + 275, 10, 15);
+    
+    // Multi-purpose turrets
+    drawDestruction(getX() - 185, getY() + 180, 20, 25);
+    drawDestruction(getX() + 185, getY() + 180, 20, 25);
+    
+    // Cannons
+    drawDestruction(getX() - 175, getY() + 20, 25, 30);
+    drawDestruction(getX() + 175, getY() + 20, 25, 30);
     
     // Decoration thing (moreso an indicator of where you should shoot)
     switch (this.management & 0b11) {
@@ -984,7 +1036,7 @@ class S2Fortress extends EnemyComp {
       
     }
     
-    rect(getX() - 125, getY() + 13, 250, 25);
+    rect(sca((int) (getX() - 125)), sca((int) (getY() + 13)), sca(250), sca(25));
     
   }
 
@@ -1052,12 +1104,12 @@ class S2Rotator extends EnemyComp {
       
     }
     
-    circle(getX(), getY(), 20);
+    circle(sca((int) getX()), sca((int) getY()), sca(20));
     
     
     strokeWeight(0);
     pushMatrix();
-    translate(getX(), getY());
+    translate(sca((int) getX()), sca((int) getY()));
     rotate((float) (0 - Math.toRadians(point)));
     
     switch (this.management & 0b11) {
@@ -1078,11 +1130,11 @@ class S2Rotator extends EnemyComp {
         println(this.getClass().getSimpleName() + ": Bogus enemy flash type: " + (this.management & 0b11));
       
     }
-    circle(0, 5, 4);
-    circle(0, -5, 4);
+    circle(0, sca(5), sca(4));
+    circle(0, sca(-5), sca(4));
     
     popMatrix();
-    strokeWeight(1);
+    strokeWeight(sca(1));
     
   }
   
@@ -1140,7 +1192,9 @@ class S2MPTurret extends EnemyComp {
         // Mortar
         case 1:
           if (lifeTime % 60 == 0) {
-            addEnemy(new BombProjectile((short) getX(), (short) getY(), plyX(targetPly), plyY(targetPly)));
+            for (byte i = 0; i < 4; i++) {
+              addEnemy(new BombProjectile((short) (getX() + random(-100, 101)), (short) (getY() + random(-100, 101)), plyX(targetPly), plyY(targetPly)));
+            }
             targetPly = !targetPly;
           }
           break;
@@ -1188,12 +1242,12 @@ class S2MPTurret extends EnemyComp {
       
     }
     
-    circle(getX(), getY(), 45);
+    circle(sca((int) getX()), sca((int) getY()), sca(45));
     
     pushMatrix();
-    translate(getX(), getY());
+    translate(sca((int) getX()), sca((int) getY()));
     rotate((float) (0 - Math.toRadians((phase == 2 ? (point + s2P3PointOffset * (p3RightIsDown ? 1 : -1) + (p3RightIsDown ? 90 : -90)) : pointTo((short) getX(), (short) getY(), plyX(targetPly), plyY(targetPly))))));
-    rect(-25, 0, 50, 25);
+    rect(sca(-25), 0, sca(50), sca(25));
     popMatrix();
     
   }
@@ -1268,19 +1322,19 @@ class S2Cannon extends EnemyComp {
       
     }
     
-    circle(getX(), getY(), 50);
+    circle(sca((int) getX()), sca((int) getY()), sca(50));
     
     if (s2Phase > 1) {
       
       pushMatrix();
-      translate(getX(), getY());
+      translate(sca((int) getX()), sca((int) getY()));
       rotate((float) (0 - Math.toRadians(pointTo((short) getX(), (short) getY(), plyX(targetPly), plyY(targetPly)))));
-      rect(-12.5, -25 - recoil / 10, 25, 50);
+      rect(sca(-12), sca((int) (-25 - recoil / 10)), sca(25), sca(50));
       popMatrix();
       
     } else {
       
-      line(getX() - 25, getY(), getX() + 25, getY());
+      line(sca((int) (getX() - 25)), sca((int) getY()), sca((int) (getX() + 25)), sca((int) getY()));
       
     }
     
@@ -1383,23 +1437,33 @@ class S3Aircraft extends EnemyComp {
         
         // Go down to shoot up
         
-        if (lifeTime % 4 != 0) return;
+        if (lifeTime % 2 == 0 && lifeTime < 540)
+          this.y += 3;
         
-        if (lifeTime == 452) {this.y += 200; targetPly = nearestPlayer((short) getX(), (short) getY());}
+        if (lifeTime % 4 != 0)
+          return;
         
-        if (lifeTime < 570) return;
+        if (lifeTime == 452)
+          targetPly = nearestPlayer((short) getX(), (short) getY());
         
-        for (byte i = 0; i < 8; i++) {
-          
-          if (lifeTime % 12 == 0)
-            addBullet(getX(), getY(), (float) (pointTo((short) getX(), (short) getY(), plyX(targetPly), plyY(targetPly)) + (i - 4) * 12), (byte) 3, B_PINKBALL, (byte) 4);
-          
-          if (lifeTime % 16 == 0 && i != 7)
-            addBullet(getX(), getY(), (float) (pointTo((short) getX(), (short) getY(), plyX(targetPly), plyY(targetPly)) + (i - 3) * 18), (byte) 5, B_PINKBALL, (byte) 4);
-          
+        
+        if (lifeTime < 570)
+          return;
+        
+        if (lifeTime < 675) {
+          for (byte i = 0; i < 8; i++) {
+            
+            if (lifeTime % 12 == 0)
+              addBullet(getX(), getY(), (float) (pointTo((short) getX(), (short) getY(), plyX(targetPly), plyY(targetPly)) + (i - 4) * 12), (byte) 3, B_PINKBALL, (byte) 4);
+            
+            if (lifeTime % 16 == 0 && i != 7)
+              addBullet(getX(), getY(), (float) (pointTo((short) getX(), (short) getY(), plyX(targetPly), plyY(targetPly)) + (i - 3) * 18), (byte) 5, B_PINKBALL, (byte) 4);
+            
+          }
+        } else {
+          this.y -= 9;
+          if (lifeTime == 716) this.y = 100;
         }
-        
-        if (lifeTime == 716) this.y -= 200;
         
       }
       
@@ -1427,7 +1491,7 @@ class S3Aircraft extends EnemyComp {
       
     }
     
-    triangle(getX(), getY() - 40, getX() - 40, getY() + 40, getX() + 40, getY() + 40);
+    triangle(sca((int) getX()), sca((int) (getY() - 40)), sca((int) (getX() - 40)), sca((int) (getY() + 40)), sca((int) (getX() + 40)), sca((int) (getY() + 40)));
     
   }
 
@@ -1526,7 +1590,34 @@ class S3Body extends EnemyComp {
       
     }
     
-    rect(getX() - 40, getY() - 40, 80, 100);
+    rect(sca((int) (getX() - 40)), sca((int) (getY() - 40)), sca(80), sca(100));
+    
+    // triangle(sca((int) (getX() + 120)), sca((int) (getY() + 35)), sca((int) (getX() + 40)), sca((int) (getY() - 35)), sca((int) (getX() + 40)), sca((int) (getY() + 35)));
+    // triangle(sca((int) (getX() - 120)), sca((int) (getY() + 35)), sca((int) (getX() - 40)), sca((int) (getY() - 35)), sca((int) (getX() - 40)), sca((int) (getY() + 35)));
+    
+    //beginShape();
+    //vertex(sca((int) (getX() + 90)), sca((int) (getY() + 35)));
+    //vertex(sca((int) (getX() + 40)), sca((int) (getY() + 22)));
+    //vertex(sca((int) (getX() + 90)), sca((int) (getY() + 10)));
+    //vertex(sca((int) (getX() + 40)), sca((int) (getY())));
+    //vertex(sca((int) (getX() + 90)), sca((int) (getY() - 10)));
+    //vertex(sca((int) (getX() + 40)), sca((int) (getY() - 22)));
+    //vertex(sca((int) (getX() + 90)), sca((int) (getY() - 35)));
+    //vertex(sca((int) (getX() + 40)), sca((int) (getY() - 35)));
+    //vertex(sca((int) (getX() + 90)), sca((int) (getY() + 35)));
+    //endShape(CLOSE);
+    
+    //beginShape();
+    //vertex(sca((int) (getX() - 90)), sca((int) (getY() + 35)));
+    //vertex(sca((int) (getX() - 40)), sca((int) (getY() + 22)));
+    //vertex(sca((int) (getX() - 90)), sca((int) (getY() + 10)));
+    //vertex(sca((int) (getX() - 40)), sca((int) (getY())));
+    //vertex(sca((int) (getX() - 90)), sca((int) (getY() - 10)));
+    //vertex(sca((int) (getX() - 40)), sca((int) (getY() - 22)));
+    //vertex(sca((int) (getX() - 90)), sca((int) (getY() - 35)));
+    //vertex(sca((int) (getX() - 40)), sca((int) (getY() - 35)));
+    //vertex(sca((int) (getX() - 90)), sca((int) (getY() + 35)));
+    //endShape(CLOSE);
     
   }
   
@@ -1630,7 +1721,7 @@ class S3Wing extends EnemyComp {
       
     }
     
-    triangle(getX() + (rightSide ? 120 : -120), getY() + 35, getX() + (rightSide ? -40 : 40), getY() - 35, getX() + (rightSide ? -40 : 40), getY() + 35);
+    triangle(sca((int) (getX() + (rightSide ? 120 : -120))), sca((int) (getY() + 35)), sca((int) (getX() + (rightSide ? -40 : 40))), sca((int) (getY() - 35)), sca((int) (getX() + (rightSide ? -40 : 40))), sca((int) (getY() + 35)));
     
     switch (this.management & 0b11) {
       
@@ -1651,7 +1742,7 @@ class S3Wing extends EnemyComp {
       
     }
     
-    triangle(getX() + (rightSide ? 120 : -120), getY() + 35, getX() + (rightSide ? -40 : 40), getY() + 10, getX() + (rightSide ? -40 : 40), getY() + 35);
+    triangle(sca((int) (getX() + (rightSide ? 120 : -120))), sca((int) (getY() + 35)), sca((int) (getX() + (rightSide ? -40 : 40))), sca((int) (getY() + 10)), sca((int) (getX() + (rightSide ? -40 : 40))), sca((int) (getY() + 35)));
     
   }
   
@@ -1697,14 +1788,14 @@ class S3Stabilizer extends EnemyComp {
     
     //rect(getX() - 60, getY() + 110, 120, 35);
     //triangle(getX() - 60, getY() + 145, getX() + 60, getY() + 145, getX(), getY() + 110);
-    rect(getX() - 15, getY() + 80, 30, 145);
+    rect(sca((int) (getX() - 15)), sca((int) (getY() + 80)), sca(30), sca(145));
     beginShape();
-    vertex(getX() - 60, getY() + 225);
-    vertex(getX() - 60, getY() + 215);
-    vertex(getX() - 5, getY() + 190);
-    vertex(getX() + 5, getY() + 190);
-    vertex(getX() + 60, getY() + 215);
-    vertex(getX() + 60, getY() + 225);
+    vertex(sca((int) (getX() - 60)), sca((int) (getY() + 225)));
+    vertex(sca((int) (getX() - 60)), sca((int) (getY() + 215)));
+    vertex(sca((int) (getX() - 5)), sca((int) (getY() + 190)));
+    vertex(sca((int) (getX() + 5)), sca((int) (getY() + 190)));
+    vertex(sca((int) (getX() + 60)), sca((int) (getY() + 215)));
+    vertex(sca((int) (getX() + 60)), sca((int) (getY() + 225)));
     endShape(CLOSE);
     
     switch (this.management & 0b11) {
@@ -1726,7 +1817,7 @@ class S3Stabilizer extends EnemyComp {
       
     }
     
-    rect(getX() - 60, getY() + 220, 120, 5);
+    rect(sca((int) (getX() - 60)), sca((int) (getY() + 220)), sca(120), sca(5));
     // triangle(getX() - 60, getY() + 225, getX(), getY() + 220, getX() + 60, getY() + 225);
     
   }
